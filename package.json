@@ -1,0 +1,15 @@
+{
+  "name": "quickprep-monorepo",
+  "version": "1.0.0",
+  "description": "QuickPrep - Progressive Web App (PWA) Panduan Memasak Praktis & Cerdas",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "npm --prefix backend start"
+  },
+  "keywords": ["pwa", "recipe", "cooking", "indonesia", "supabase", "express", "react"],
+  "author": "QuickPrep Team",
+  "license": "ISC"
+}

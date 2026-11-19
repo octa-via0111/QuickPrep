@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "QuickPrep REST API Collection",
+    "description": "Koleksi Postman untuk pengujian REST API QuickPrep - Smart Cooking Guide PWA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Mengecek status server backend"
+      }
+    },
+    {
+      "name": "1. Resep",
+      "item": [
+        {
+          "name": "Get All Recipes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"]
+            },
+            "description": "Mengambil semua daftar resep"
+          }
+        },
+        {
+          "name": "Search Recipes (Pencarian: telur)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?search=telur",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "search", "value": "telur" }
+              ]
+            },
+            "description": "Mencari resep berdasarkan kata kunci"
+          }
+        },
+        {
+          "name": "Filter by Category (sarapan)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?category=sarapan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "category", "value": "sarapan" }
+              ]
+            },
+            "description": "Filter resep berdasarkan kategori"
+          }
+        },
+        {
+          "name": "Filter by Max Budget (Rp10.000)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?maxBudget=10000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "maxBudget", "value": "10000" }
+              ]
+            },
+            "description": "Filter resep sesuai budget maksimal"
+          }
+        },
+        {
+          "name": "Filter by Tool (rice-cooker)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?tool=rice-cooker",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "tool", "value": "rice-cooker" }
+              ]
+            },
+            "description": "Filter resep yang bisa dimasak dengan alat tertentu"
+          }
+        },
+        {
+          "name": "Filter by Max Cooking Time (15 menit)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?maxCookingTime=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "maxCookingTime", "value": "15" }
+              ]
+            },
+            "description": "Filter resep cepat masak"
+          }
+        },
+        {
+          "name": "Combined Filter (Budget 15rb + Sarapan + Mudah)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes?category=sarapan&maxBudget=15000&difficulty=Mudah",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes"],
+              "query": [
+                { "key": "category", "value": "sarapan" },
+                { "key": "maxBudget", "value": "15000" },
+                { "key": "difficulty", "value": "Mudah" }
+              ]
+            },
+            "description": "Filter gabungan"
+          }
+        },
+        {
+          "name": "Get Recipe Detail by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes/rec-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes", "rec-01"]
+            },
+            "description": "Mendapatkan detail lengkap satu resep beserta bahan, alat, dan langkah memasak"
+          }
+        },
+        {
+          "name": "Get Substitutions for Specific Recipe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/recipes/rec-01/substitutions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recipes", "rec-01", "substitutions"]
+            },
+            "description": "Mendapatkan substitusi bahan khusus untuk resep tertentu"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Kategori",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categories"]
+            },
+            "description": "Mendapatkan seluruh kategori masakan"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Alat Masak",
+      "item": [
+        {
+          "name": "Get All Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tools"]
+            },
+            "description": "Mendapatkan daftar alat masak (Rice cooker, teflon, dll)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Substitusi Bahan",
+      "item": [
+        {
+          "name": "Get All Substitutions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/substitutions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "substitutions"]
+            },
+            "description": "Mendapatkan seluruh daftar alternatif pengganti bahan"
+          }
+        },
+        {
+          "name": "Search Substitution by Ingredient (santan)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/substitutions?ingredient=santan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "substitutions"],
+              "query": [
+                { "key": "ingredient", "value": "santan" }
+              ]
+            },
+            "description": "Mencari alternatif pengganti untuk bahan tertentu seperti santan"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Riwayat Memasak",
+      "item": [
+        {
+          "name": "Get Cooking History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cooking-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cooking-history"]
+            },
+            "description": "Mendapatkan daftar riwayat masakan yang pernah dimasak"
+          }
+        },
+        {
+          "name": "Create Cooking History",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipe_id\": \"rec-01\",\n  \"recipe_name\": \"Nasi Goreng Telur Kampung\",\n  \"servings_cooked\": 1,\n  \"duration_minutes\": 12,\n  \"rating\": 5,\n  \"notes\": \"Enak banget, bumbu kecapnya meresap pas!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cooking-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cooking-history"]
+            },
+            "description": "Menyimpan catatan resep yang baru saja selesai dimasak"
+          }
+        }
+      ]
+    }
+  ]
+}

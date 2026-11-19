@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPrep - Sedang Offline</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #FAF7F2;
+      color: #2E231F;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #FFFFFF;
+      padding: 32px 24px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(46, 35, 31, 0.08);
+      max-width: 400px;
+      width: 100%;
+    }
+    .icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      fill: #E0623A;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: #2E231F;
+    }
+    p {
+      color: #6B5E57;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .btn {
+      background: #E0623A;
+      color: #FFFFFF;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background: #C85228;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+      <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+      <line x1="12" y1="20" x2="12.01" y2="20"></line>
+    </svg>
+    <h1>Koneksi Internet Terputus</h1>
+    <p>Sepertinya kamu sedang offline. Kamu tetap bisa membuka resep-resep yang sebelumnya sudah pernah kamu lihat dan tersimpan di memori perangkat.</p>
+    <button class="btn" onclick="window.location.reload()">Coba Muat Ulang</button>
+  </div>
+</body>
+</html>

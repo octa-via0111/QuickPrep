@@ -1,0 +1,21 @@
+{
+  "name": "quickprep-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API for QuickPrep - Smart Cooking Guide PWA",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": ["quickprep", "recipe", "pwa", "supabase", "express"],
+  "author": "QuickPrep Team",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0"
+  }
+}
