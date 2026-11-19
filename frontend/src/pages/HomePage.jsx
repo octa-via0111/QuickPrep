@@ -53,7 +53,7 @@ export const HomePage = () => {
               Selamat datang kembali,
             </div>
             <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-main)', marginTop: '2px' }}>
-              {profile.avatar} Halo, <span style={{ color: 'var(--primary)' }}>{profile.name}</span>!
+              Halo, <span style={{ color: 'var(--primary)' }}>{profile.name}</span>!
             </h1>
           </div>
 
@@ -405,7 +405,7 @@ export const HomePage = () => {
                 {history[0].recipe_name}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Dimasak: {new Date(history[0].cooked_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} • {history[0].servings_cooked} porsi
+                Dimasak: {new Date(history[0].cooked_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} | {history[0].servings_cooked} porsi
               </div>
             </div>
 

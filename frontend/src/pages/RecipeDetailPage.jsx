@@ -205,7 +205,7 @@ export const RecipeDetailPage = () => {
           <div>
             <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: '600' }}>TOTAL WAKTU</div>
             <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)', marginTop: '2px' }}>
-              ⏱️ {formatTime((recipe.preparation_time || 0) + recipe.cooking_time)}
+              {formatTime((recipe.preparation_time || 0) + recipe.cooking_time)}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               (Masak: {recipe.cooking_time} mnt)
@@ -215,7 +215,7 @@ export const RecipeDetailPage = () => {
           <div>
             <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: '600' }}>ESTIMASI TOTAL</div>
             <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>
-              💰 {formatRupiah(Math.round(recipe.estimated_cost * scaleFactor))}
+              {formatRupiah(Math.round(recipe.estimated_cost * scaleFactor))}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               ({formatRupiah(recipe.cost_per_serving)} / porsi)
@@ -298,7 +298,7 @@ export const RecipeDetailPage = () => {
             color: 'var(--sage-dark)',
             lineHeight: 1.5
           }}>
-            <strong>💡 Tips Kunci:</strong> {recipe.tips}
+            <strong>Tips Memasak:</strong> {recipe.tips}
           </div>
         )}
       </div>
@@ -328,7 +328,7 @@ export const RecipeDetailPage = () => {
                   border: '1px solid var(--border-subtle)'
                 }}
               >
-                🍳 {t.name || t}
+                {t.name || t}
               </span>
             ))}
           </div>
@@ -496,7 +496,7 @@ export const RecipeDetailPage = () => {
                   </h4>
                   {step.duration_minutes && (
                     <span style={{ fontSize: '11.5px', color: 'var(--text-light)', fontWeight: '600' }}>
-                      ⏱️ ~{step.duration_minutes} mnt
+                      ~{step.duration_minutes} mnt
                     </span>
                   )}
                 </div>
@@ -514,7 +514,7 @@ export const RecipeDetailPage = () => {
                     padding: '6px 10px',
                     borderRadius: 'var(--radius-sm)'
                   }}>
-                    💡 {step.tips}
+                    Catatan: {step.tips}
                   </div>
                 )}
               </div>

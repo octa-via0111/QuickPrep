@@ -8,7 +8,7 @@ const SETTINGS_KEY = 'quickprep_settings';
 // Default Profile
 export const DEFAULT_PROFILE = {
   name: 'Anak Kos Hebat',
-  avatar: '👨‍🍳',
+  avatarColor: '#E0623A',
   defaultBudget: 15000,
   ownedTools: ['rice-cooker', 'wajan', 'teflon', 'kompor'],
   voiceSpeed: 1.0,

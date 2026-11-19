@@ -233,10 +233,10 @@ export const ExplorePage = () => {
               }}
             >
               <option value="">Semua Durasi</option>
-              <option value="12">≤ 12 Menit (Kilat)</option>
-              <option value="15">≤ 15 Menit</option>
-              <option value="20">≤ 20 Menit</option>
-              <option value="30">≤ 30 Menit</option>
+              <option value="12">Maks. 12 Menit (Kilat)</option>
+              <option value="15">Maks. 15 Menit</option>
+              <option value="20">Maks. 20 Menit</option>
+              <option value="30">Maks. 30 Menit</option>
             </select>
           </div>
         </div>

@@ -148,7 +148,7 @@ export const BudgetPage = () => {
           </div>
 
           <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--sage)' }}>
-            ✓ Ditemukan {recipes.length} menu yang memenuhi syarat
+            Ditemukan {recipes.length} menu yang memenuhi syarat
           </span>
         </div>
       </section>
@@ -176,7 +176,7 @@ export const BudgetPage = () => {
       <section>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '19px', fontWeight: '800' }}>
-            Menu Masakan ≤ {formatRupiah(selectedBudget)}
+            Menu Masakan hingga {formatRupiah(selectedBudget)}
           </h2>
         </div>
 

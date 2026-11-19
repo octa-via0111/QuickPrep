@@ -118,10 +118,10 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
 
     // Center icon
     ctx.fillStyle = '#E0623A';
-    ctx.font = 'bold 18px sans-serif';
+    ctx.font = '800 12px "Plus Jakarta Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🍳', centerX, centerY);
+    ctx.fillText('SPIN', centerX, centerY);
     ctx.restore();
   }, [candidateRecipes, numSlices]);
 
@@ -277,9 +277,9 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
                 {formatRupiah(winner.estimated_cost)}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                <span>⏱️ {formatTime(winner.cooking_time)}</span>
-                <span>•</span>
-                <span>📊 {winner.difficulty}</span>
+                <span>Durasi: {formatTime(winner.cooking_time)}</span>
+                <span>|</span>
+                <span>Tingkat: {winner.difficulty}</span>
               </div>
             </div>
           </div>

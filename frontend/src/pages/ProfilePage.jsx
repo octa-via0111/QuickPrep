@@ -19,7 +19,12 @@ import {
   Smartphone,
   Layers,
   ChefHat,
-  HeartHandshake
+  HeartHandshake,
+  CheckSquare,
+  Square,
+  Compass,
+  RotateCw,
+  RefreshCw
 } from 'lucide-react';
 import { 
   getStoredProfile, 
@@ -31,7 +36,14 @@ import { formatRupiah } from '../utils/formatter.js';
 import toolService from '../services/toolService.js';
 import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
 
-const AVATAR_OPTIONS = ['👨‍🍳', '👩‍🍳', '🍳', '🍜', '🥘', '🥑', '🥗', '🍕', '🍰'];
+const AVATAR_THEMES = [
+  { color: '#E0623A', label: 'Terracotta' },
+  { color: '#5B8266', label: 'Sage' },
+  { color: '#2563EB', label: 'Blue' },
+  { color: '#D97706', label: 'Amber' },
+  { color: '#7C3AED', label: 'Violet' },
+  { color: '#4B5563', label: 'Slate' }
+];
 
 export const ProfilePage = ({ defaultTab }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,23 +99,26 @@ export const ProfilePage = ({ defaultTab }) => {
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Yakin ingin menghapus seluruh riwayat masakanmu?')) {
+    if (window.confirm('Hapus seluruh riwayat masakan Anda?')) {
       localStorage.removeItem('quickprep_cooking_history');
       setHistory([]);
     }
   };
+
+  const userInitial = (profile.name || 'U').trim().charAt(0).toUpperCase();
+  const userColor = profile.avatarColor || '#E0623A';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '760px', margin: '0 auto' }}>
       {/* Page Header */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: '800', marginBottom: '6px' }}>
-          {activeTab === 'profile' ? 'Profil & Preferensi' : 'Tentang QuickPrep'}
+          {activeTab === 'profile' ? 'Profil Pengguna' : 'Tentang QuickPrep'}
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           {activeTab === 'profile' 
-            ? 'Kelola identitas memasakmu, alat masak yang tersedia di kos, dan riwayat masakan.' 
-            : 'Informasi lengkap pengembang, konsep aplikasi, teknologi PWA, dan panduan QuickPrep.'}
+            ? 'Kelola informasi pengguna, alat masak yang tersedia, dan riwayat masakan.' 
+            : 'Informasi sistem, arsitektur aplikasi PWA, dan panduan QuickPrep.'}
         </p>
       </div>
 
@@ -175,47 +190,63 @@ export const ProfilePage = ({ defaultTab }) => {
           gap: '8px'
         }}>
           <Check size={18} />
-          <span>Pengaturan profil dan preferensi berhasil disimpan!</span>
+          <span>Pengaturan profil dan preferensi berhasil disimpan.</span>
         </div>
       )}
 
       {/* ===================== TAB 1: PROFIL PENGGUNA ===================== */}
       {activeTab === 'profile' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Edit User Profile Form */}
+          {/* User Profile Form */}
           <form onSubmit={handleSaveProfile} className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <User size={18} color="var(--primary)" />
-              <span>Identitas & Preferensi Saya</span>
+              <span>Identitas Pengguna</span>
             </h2>
 
-            {/* Avatar Selector */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
-                Pilih Karakter Avatar:
-              </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {AVATAR_OPTIONS.map((av) => (
-                  <button
-                    type="button"
-                    key={av}
-                    onClick={() => setProfile(prev => ({ ...prev, avatar: av }))}
-                    style={{
-                      width: '44px',
-                      height: '44px',
-                      fontSize: '22px',
-                      borderRadius: '12px',
-                      background: profile.avatar === av ? 'var(--primary-light)' : 'var(--bg-card)',
-                      border: profile.avatar === av ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    {av}
-                  </button>
-                ))}
+            {/* Profile Avatar Preview & Color Themes */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '22px' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: userColor,
+                color: '#FFFFFF',
+                fontSize: '26px',
+                fontWeight: '800',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
+                flexShrink: 0
+              }}>
+                {userInitial}
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
+                  Warna Tema Identitas:
+                </label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {AVATAR_THEMES.map((theme) => (
+                    <button
+                      type="button"
+                      key={theme.color}
+                      onClick={() => setProfile(prev => ({ ...prev, avatarColor: theme.color }))}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        background: theme.color,
+                        border: userColor === theme.color ? '3px solid #FFFFFF' : 'none',
+                        outline: userColor === theme.color ? `2px solid ${theme.color}` : 'none',
+                        cursor: 'pointer',
+                        transition: 'transform 0.15s ease'
+                      }}
+                      title={theme.label}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -229,7 +260,7 @@ export const ProfilePage = ({ defaultTab }) => {
                 className="input-field"
                 value={profile.name}
                 onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Nama kamu..."
+                placeholder="Nama Anda"
                 required
               />
             </div>
@@ -237,7 +268,7 @@ export const ProfilePage = ({ defaultTab }) => {
             {/* Default Budget */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                Budget Andalan Harian (Rp):
+                Budget Masak Harian (Rupiah):
               </label>
               <input
                 type="number"
@@ -252,10 +283,10 @@ export const ProfilePage = ({ defaultTab }) => {
             <div style={{ marginBottom: '20px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Wrench size={16} color="var(--sage)" />
-                <span style={{ fontSize: '14px', fontWeight: '700' }}>Alat Masak yang Kamu Miliki di Kos:</span>
+                <span style={{ fontSize: '14px', fontWeight: '700' }}>Alat Masak yang Dimiliki:</span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                Resep di fitur "Cook with My Tools" akan memprioritaskan alat masak yang sudah kamu miliki ini.
+                Pilihan ini digunakan sebagai filter utama pada menu Cook with My Tools.
               </p>
 
               <div style={{
@@ -284,7 +315,11 @@ export const ProfilePage = ({ defaultTab }) => {
                         userSelect: 'none'
                       }}
                     >
-                      <span style={{ fontSize: '16px' }}>{hasTool ? '✅' : '⚪'}</span>
+                      {hasTool ? (
+                        <CheckSquare size={16} color="var(--sage)" />
+                      ) : (
+                        <Square size={16} color="var(--text-light)" />
+                      )}
                       <span>{t.name}</span>
                     </div>
                   );
@@ -304,16 +339,16 @@ export const ProfilePage = ({ defaultTab }) => {
                 className="input-field"
                 style={{ maxWidth: '240px' }}
               >
-                <option value={0.75}>0.75x (Lebih Lambat)</option>
-                <option value={1.0}>1.0x (Normal / Standar)</option>
-                <option value={1.25}>1.25x (Sedang Cepat)</option>
+                <option value={0.75}>0.75x (Lambat)</option>
+                <option value={1.0}>1.0x (Normal)</option>
+                <option value={1.25}>1.25x (Sedang)</option>
                 <option value={1.5}>1.5x (Cepat)</option>
               </select>
             </div>
 
             <button type="submit" className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '15px' }}>
               <Check size={16} />
-              <span>Simpan Preferensi Profil</span>
+              <span>Simpan Pengaturan Profil</span>
             </button>
           </form>
 
@@ -322,7 +357,7 @@ export const ProfilePage = ({ defaultTab }) => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <History size={18} color="var(--primary)" />
-                <h2 style={{ fontSize: '18px', fontWeight: '800' }}>Riwayat Masakan yang Pernah Dimasak</h2>
+                <h2 style={{ fontSize: '18px', fontWeight: '800' }}>Riwayat Masakan yang Telah Dibuat</h2>
               </div>
 
               {history.length > 0 && (
@@ -337,7 +372,7 @@ export const ProfilePage = ({ defaultTab }) => {
 
             {history.length === 0 ? (
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>
-                Belum ada masakan yang dicatat. Selesaikan langkah memasak di <strong>Mode Panduan Suara</strong> untuk mencatat riwayat pertamamu!
+                Belum ada masakan yang dicatat. Selesaikan langkah memasak di Mode Panduan Suara untuk mencatat riwayat pertama Anda.
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -359,7 +394,7 @@ export const ProfilePage = ({ defaultTab }) => {
                         {item.recipe_name}
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        Dimasak: {new Date(item.cooked_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} • {item.servings_cooked} porsi
+                        {new Date(item.cooked_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} | {item.servings_cooked} porsi
                       </div>
                       {item.notes && (
                         <div style={{ fontSize: '12px', color: 'var(--sage-dark)', marginTop: '2px', fontStyle: 'italic' }}>
@@ -435,17 +470,17 @@ export const ProfilePage = ({ defaultTab }) => {
             </div>
           </div>
 
-          {/* Visi & Deskripsi Singkat */}
+          {/* Visi & Deskripsi */}
           <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ChefHat size={20} color="var(--primary)" />
-              <span>Visi & Tujuan QuickPrep</span>
+              <span>Visi dan Tujuan Aplikasi</span>
             </h3>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '14px' }}>
-              <strong>QuickPrep</strong> lahir untuk menjawab kegelisahan mahasiswa rantau, anak kos, dan pemula memasak yang sering kali bingung menentukan menu harian, terbentur keterbatasan alat masak di kamar kos, atau ingin memasak hemat tanpa melebihi uang saku.
+              <strong>QuickPrep</strong> dirancang sebagai panduan memasak praktis untuk mahasiswa dan pemula dalam menentukan hidangan harian berdasarkan ketersediaan bahan, alat memasak, dan batas pengeluaran.
             </p>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-              Aplikasi ini memadukan kemudahan menentukan masakan berdasarkan <strong>uang yang dimiliki</strong>, <strong>alat yang tersedia</strong>, fitur interaktif <strong>Recipe Spin</strong>, solusi cerdas <strong>pengganti bumbu</strong> saat bahan habis, serta bimbingan <strong>suara (Voice Guided Cooking)</strong> agar tangan tetap bebas memasak tanpa terus-menerus memegang layar smartphone.
+              Aplikasi ini mengintegrasikan pencarian resep sesuai budget, filter alat yang dimiliki, pemilihan menu acak melalui roda putar (Recipe Spin), rekomendasi substitusi bumbu saat bahan tertentu tidak tersedia, dan panduan langkah memasak bersuara (Voice Guided Cooking).
             </p>
           </div>
 
@@ -453,40 +488,40 @@ export const ProfilePage = ({ defaultTab }) => {
           <div className="card" style={{ padding: '24px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sparkles size={20} color="var(--primary)" />
-              <span>6 Fitur Utama Unggulan</span>
+              <span>Fitur Utama QuickPrep</span>
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
-                  🎰 1. Recipe Spin Wheel
+                  1. Recipe Spin Wheel
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Roda roulette penentu resep acak berdasarkan filter budget, kategori, dan alat masak saat kamu bingung mau makan apa.
+                  Roda roulette penentu resep acak berdasarkan filter budget, kategori, dan alat masak saat bingung menentukan menu.
                 </div>
               </div>
 
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--sage)', marginBottom: '4px' }}>
-                  💰 2. Cook on Budget
+                  2. Cook on Budget
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Filter masakan mulai dari Rp5.000 hingga Rp25.000 dengan kalkulasi biaya total dan biaya per porsi.
+                  Filter masakan berdasarkan nominal uang yang dimiliki dengan kalkulasi biaya total dan estimasi per porsi.
                 </div>
               </div>
 
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: '#D97706', marginBottom: '4px' }}>
-                  🍳 3. Cook with My Tools
+                  3. Cook with My Tools
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Menyaring menu masakan yang hanya membutuhkan alat yang kamu miliki (Rice cooker, teflon, panci, atau wajan).
+                  Menyaring menu masakan yang hanya membutuhkan peralatan yang tersedia (Rice cooker, teflon, panci, atau wajan).
                 </div>
               </div>
 
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
-                  🔄 4. Missing Ingredients
+                  4. Missing Ingredients
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   Rekomendasi substitusi bumbu saat bahan habis, lengkap dengan penjelasan aroma, rasa, dan tekstur.
@@ -495,19 +530,19 @@ export const ProfilePage = ({ defaultTab }) => {
 
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--sage)', marginBottom: '4px' }}>
-                  🔊 5. Voice Guided Cooking
+                  5. Voice Guided Cooking
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Panduan memasak bersuara alami Bahasa Indonesia per langkah, kontrol kecepatan, timer, dan tanpa iklan pengganggu.
+                  Panduan memasak bersuara alami Bahasa Indonesia per langkah, kontrol kecepatan suara, dan timer terintegrasi.
                 </div>
               </div>
 
               <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: '800', fontSize: '14px', color: '#D97706', marginBottom: '4px' }}>
-                  📱 6. Offline Ready PWA
+                  6. Offline Ready PWA
                 </div>
                 <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Dapat diinstall langsung ke homescreen Android, iOS, dan Desktop dengan dukungan offline caching Service Worker.
+                  Dapat diinstal langsung ke perangkat dengan dukungan offline caching melalui Service Worker.
                 </div>
               </div>
             </div>
@@ -517,25 +552,25 @@ export const ProfilePage = ({ defaultTab }) => {
           <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Layers size={20} color="var(--sage)" />
-              <span>Teknologi Praktikum Modul 1, 4, & 5</span>
+              <span>Arsitektur dan Teknologi</span>
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
-              <div>💻 <strong>Frontend:</strong> React JS, Vite, JavaScript ES6, React Router DOM, Axios, Lucide Icons</div>
-              <div>⚙️ <strong>Backend:</strong> Node.js, Express.js REST API, CORS, Validator & Error Handler Middleware</div>
-              <div>🗄️ <strong>Database:</strong> Supabase PostgreSQL (8 Tabel Relasional & Indexing)</div>
-              <div>⚡ <strong>PWA:</strong> Web App Manifest, Service Worker Caching, Offline Fallback, Install Prompt</div>
+              <div><strong>Frontend:</strong> React JS, Vite, JavaScript ES6, React Router DOM, Axios, Lucide Icons</div>
+              <div><strong>Backend:</strong> Node.js, Express.js REST API, CORS, Validator & Error Handler Middleware</div>
+              <div><strong>Database:</strong> Supabase PostgreSQL (8 Tabel Relasional & Indexing)</div>
+              <div><strong>PWA:</strong> Web App Manifest, Service Worker Caching, Offline Fallback, Install Prompt</div>
             </div>
           </div>
 
-          {/* Pengembang / Tim Praktikum */}
+          {/* Tim Pengembang */}
           <div className="card" style={{ padding: '24px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <HeartHandshake size={20} color="var(--primary)" />
               <span>Tim Pengembang Aplikasi</span>
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '16px' }}>
-              Aplikasi ini dikembangkan sebagai Proyek Tugas Akhir Praktikum Pemrograman Web / Progressive Web App (PWA) oleh <strong>Kelompok 21 Shift 03</strong>.
+              Aplikasi ini dikembangkan sebagai Tugas Akhir Praktikum Pemrograman Web / Progressive Web App (PWA) oleh <strong>Kelompok 21 Shift 03</strong>.
             </p>
 
             <div style={{
@@ -548,7 +583,7 @@ export const ProfilePage = ({ defaultTab }) => {
                 Tugas Akhir Praktikum PWA
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Kelompok 21 • Shift 03 • Praktikum Pengembangan Aplikasi Web
+                Kelompok 21 | Shift 03 | Praktikum Pengembangan Aplikasi Web
               </div>
             </div>
 

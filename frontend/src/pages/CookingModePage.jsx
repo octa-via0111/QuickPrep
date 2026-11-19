@@ -157,7 +157,7 @@ export const CookingModePage = () => {
           </div>
 
           <h1 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>
-            Selamat! Masakan Selesai 🎉
+            Selamat, Masakan Selesai!
           </h1>
           <p style={{ fontSize: '14.5px', color: 'var(--text-muted)', marginBottom: '24px' }}>
             Kamu berhasil memasak <strong style={{ color: 'var(--primary)' }}>{recipe.name}</strong> dengan panduan suara QuickPrep.
@@ -218,9 +218,14 @@ export const CookingModePage = () => {
                 color: 'var(--success-green)',
                 borderRadius: 'var(--radius-md)',
                 fontSize: '13px',
-                fontWeight: '700'
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
               }}>
-                ✓ Berhasil disimpan ke riwayat memasakmu!
+                <CheckCircle size={16} />
+                <span>Berhasil disimpan ke riwayat memasakmu.</span>
               </div>
             )}
 
@@ -366,7 +371,7 @@ export const CookingModePage = () => {
             lineHeight: 1.5,
             marginBottom: '18px'
           }}>
-            <strong>💡 Perhatian:</strong> {currentStep.tips}
+            <strong>Catatan:</strong> {currentStep.tips}
           </div>
         )}
 
@@ -498,7 +503,7 @@ export const CookingModePage = () => {
             background: currentStepIndex === totalSteps - 1 ? 'var(--sage)' : 'var(--primary)'
           }}
         >
-          <span>{currentStepIndex === totalSteps - 1 ? 'Selesai Memasak! 🎉' : 'Langkah Selanjutnya'}</span>
+          <span>{currentStepIndex === totalSteps - 1 ? 'Selesai Memasak' : 'Langkah Selanjutnya'}</span>
           <ChevronRight size={18} />
         </button>
       </div>

@@ -113,10 +113,10 @@ export const SpinPage = () => {
               style={{ padding: '8px 10px', fontSize: '13px' }}
             >
               <option value="">Bebas Budget</option>
-              <option value="8000">≤ Rp8.000</option>
-              <option value="10000">≤ Rp10.000</option>
-              <option value="15000">≤ Rp15.000</option>
-              <option value="20000">≤ Rp20.000</option>
+              <option value="8000">Maks. Rp8.000</option>
+              <option value="10000">Maks. Rp10.000</option>
+              <option value="15000">Maks. Rp15.000</option>
+              <option value="20000">Maks. Rp20.000</option>
             </select>
           </div>
 
@@ -150,9 +150,9 @@ export const SpinPage = () => {
               style={{ padding: '8px 10px', fontSize: '13px' }}
             >
               <option value="">Bebas Durasi</option>
-              <option value="12">≤ 12 Menit</option>
-              <option value="15">≤ 15 Menit</option>
-              <option value="20">≤ 20 Menit</option>
+              <option value="12">Maks. 12 Menit</option>
+              <option value="15">Maks. 15 Menit</option>
+              <option value="20">Maks. 20 Menit</option>
             </select>
           </div>
         </div>
