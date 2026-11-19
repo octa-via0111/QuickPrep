@@ -1,7 +1,3 @@
--- QuickPrep Database Seed SQL
--- Script untuk mengisi data awal ke Supabase PostgreSQL
--- Jalankan di SQL Editor Supabase setelah menjalankan schema.sql
-
 -- 1. Bersihkan data lama jika ada
 DELETE FROM recipe_ingredients;
 DELETE FROM recipe_tools;

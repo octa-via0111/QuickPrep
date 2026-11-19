@@ -33,6 +33,7 @@ function App() {
           <Route path="/recipe/:id" element={<RecipeDetailPage />} />
           <Route path="/cook/:id" element={<CookingModePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/about" element={<ProfilePage defaultTab="about" />} />
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

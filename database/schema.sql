@@ -1,6 +1,3 @@
--- QuickPrep Database Schema for Supabase PostgreSQL
--- Aplikasi Panduan Memasak Praktis & Cerdas
-
 -- 1. Table: categories
 CREATE TABLE IF NOT EXISTS categories (
     id VARCHAR(50) PRIMARY KEY,
