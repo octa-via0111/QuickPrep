@@ -6,8 +6,7 @@ import {
   WifiOff, 
   Download, 
   Search, 
-  Heart,
-  Sparkles
+  Heart
 } from 'lucide-react';
 import useOnlineStatus from '../hooks/useOnlineStatus.js';
 import { subscribeToInstallPrompt, promptPWAInstall } from '../utils/pwa.js';
@@ -60,12 +59,12 @@ export const Navbar = () => {
             width: '38px',
             height: '38px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #E0623A, #C85228)',
+            background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#FFFFFF',
-            boxShadow: '0 4px 12px rgba(224, 98, 58, 0.28)'
+            boxShadow: '0 4px 14px rgba(38, 15, 61, 0.25)'
           }}>
             <UtensilsCrossed size={20} />
           </div>
@@ -74,7 +73,7 @@ export const Navbar = () => {
               fontSize: '19px',
               fontWeight: '800',
               letterSpacing: '-0.3px',
-              color: 'var(--text-main)',
+              color: 'var(--purple-dark)',
               lineHeight: 1.1
             }}>
               Quick<span style={{ color: 'var(--primary)' }}>Prep</span>
@@ -90,7 +89,7 @@ export const Navbar = () => {
         </Link>
 
         {/* Desktop Nav Links */}
-        <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {navLinks.map((link) => {
             const isActive = location.pathname === link.to;
             return (
@@ -98,7 +97,7 @@ export const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 style={{
-                  padding: '8px 14px',
+                  padding: '7px 14px',
                   borderRadius: '999px',
                   fontSize: '14px',
                   fontWeight: isActive ? '700' : '600',
@@ -129,33 +128,19 @@ export const Navbar = () => {
           })}
         </nav>
 
-        {/* Right Action Icons: Online/Offline indicator & PWA Install */}
+        {/* Right Action Icons: PWA Install (Online text removed) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Online/Offline Badge */}
-          <div 
-            title={isOnline ? 'Online - Terhubung ke API' : 'Offline - Mode Memori Cache'}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '999px',
-              fontSize: '12px',
-              fontWeight: '600',
-              background: isOnline ? 'var(--success-green-light)' : 'var(--alert-red-light)',
-              color: isOnline ? 'var(--success-green)' : 'var(--alert-red)'
-            }}
-          >
-            {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
-            <span className="online-label">{isOnline ? 'Online' : 'Offline'}</span>
-          </div>
-
           {/* PWA Install Button if available */}
           {canInstall && (
             <button
               onClick={promptPWAInstall}
               className="btn-primary"
-              style={{ padding: '7px 14px', fontSize: '13px' }}
+              style={{
+                padding: '7px 15px',
+                fontSize: '13px',
+                background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
+                boxShadow: '0 4px 12px rgba(38, 15, 61, 0.25)'
+              }}
             >
               <Download size={14} />
               <span>Install App</span>
@@ -168,9 +153,6 @@ export const Navbar = () => {
         @media (max-width: 820px) {
           .desktop-nav {
             display: none !important;
-          }
-          .online-label {
-            display: none;
           }
         }
       `}</style>

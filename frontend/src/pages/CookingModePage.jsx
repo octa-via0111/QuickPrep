@@ -12,7 +12,6 @@ import {
   CheckCircle, 
   Clock, 
   Timer, 
-  Sparkles, 
   Star,
   Award,
   ArrowRight,

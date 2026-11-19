@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, Info, ArrowRight, Check, Sparkles, Filter } from 'lucide-react';
+import { Wallet, Info, ArrowRight, Check, Filter } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 import { formatRupiah } from '../utils/formatter.js';

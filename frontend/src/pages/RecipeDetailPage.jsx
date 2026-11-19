@@ -9,7 +9,7 @@ import {
   Volume2, 
   CheckSquare, 
   Square, 
-  Sparkles, 
+  RefreshCw, 
   HelpCircle, 
   ChefHat, 
   Share2,
@@ -436,7 +436,7 @@ export const RecipeDetailPage = () => {
                     }}
                     title="Cari alternatif bahan ini jika tidak ada"
                   >
-                    <Sparkles size={11} color="var(--primary)" />
+                    <RefreshCw size={11} color="var(--primary)" />
                     <span>Ganti</span>
                   </button>
                 </div>

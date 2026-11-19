@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Search, 
-  Sparkles, 
+  Disc3, 
   Wallet, 
   Wrench, 
   ArrowRight, 
@@ -60,9 +60,14 @@ export const HomePage = () => {
           <Link
             to="/spin"
             className="btn-primary"
-            style={{ padding: '10px 18px', fontSize: '13.5px' }}
+            style={{
+              padding: '10px 18px',
+              fontSize: '13.5px',
+              background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
+              boxShadow: '0 4px 14px rgba(38, 15, 61, 0.25)'
+            }}
           >
-            <Sparkles size={16} />
+            <Disc3 size={16} />
             <span>Spin Menu Bingung</span>
           </Link>
         </div>
@@ -88,12 +93,12 @@ export const HomePage = () => {
       {/* 2. Hero Cozy Banner QuickPrep */}
       <section style={{
         position: 'relative',
-        background: 'linear-gradient(135deg, #E0623A 0%, #C85228 100%)',
+        background: 'linear-gradient(135deg, #260F3D 0%, #431C75 45%, #E0623A 100%)',
         borderRadius: 'var(--radius-xl)',
         padding: '28px 24px',
         color: '#FFFFFF',
         overflow: 'hidden',
-        boxShadow: 'var(--shadow-warm)'
+        boxShadow: '0 10px 30px rgba(38, 15, 61, 0.2)'
       }}>
         {/* Background decorative pattern circles */}
         <div style={{

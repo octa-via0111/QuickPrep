@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Heart, Users, Sparkles, ChefHat } from 'lucide-react';
+import { Clock, Heart, Users, ChefHat } from 'lucide-react';
 import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 
@@ -69,17 +69,21 @@ export const RecipeCard = ({ recipe }) => {
         {/* Difficulty Badge Top Left */}
         <div style={{
           position: 'absolute',
-          top: '12px',
-          left: '12px',
+          top: '8px',
+          left: '8px',
           display: 'flex',
-          gap: '6px'
+          flexWrap: 'wrap',
+          gap: '4px',
+          maxWidth: 'calc(100% - 44px)'
         }}>
           <span 
             className="badge"
             style={{
               background: diffStyle.bg,
               color: diffStyle.text,
-              border: `1px solid ${diffStyle.border}`
+              border: `1px solid ${diffStyle.border}`,
+              fontSize: '10.5px',
+              padding: '2px 7px'
             }}
           >
             {recipe.difficulty}
@@ -88,7 +92,12 @@ export const RecipeCard = ({ recipe }) => {
           {recipe.is_kos_friendly && (
             <span 
               className="badge" 
-              style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--text-main)' }}
+              style={{
+                background: 'rgba(255,255,255,0.92)',
+                color: 'var(--text-main)',
+                fontSize: '10px',
+                padding: '2px 6px'
+              }}
             >
               Anak Kos
             </span>
@@ -101,17 +110,17 @@ export const RecipeCard = ({ recipe }) => {
           aria-label={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
           style={{
             position: 'absolute',
-            top: '10px',
-            right: '10px',
-            width: '36px',
-            height: '36px',
+            top: '8px',
+            right: '8px',
+            width: '30px',
+            height: '30px',
             borderRadius: '50%',
             background: 'rgba(255, 255, 255, 0.92)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
             transition: 'all 0.2s ease',
             color: isFav ? 'var(--alert-red)' : 'var(--text-muted)'
           }}
@@ -119,7 +128,7 @@ export const RecipeCard = ({ recipe }) => {
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
           <Heart 
-            size={18} 
+            size={16} 
             fill={isFav ? 'currentColor' : 'none'} 
             strokeWidth={isFav ? 0 : 2.2} 
           />
@@ -128,7 +137,7 @@ export const RecipeCard = ({ recipe }) => {
 
       {/* Content Section */}
       <div style={{
-        padding: '16px',
+        padding: '12px',
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
@@ -137,38 +146,23 @@ export const RecipeCard = ({ recipe }) => {
         <div>
           {/* Category Tag */}
           <div style={{
-            fontSize: '11.5px',
-            fontWeight: '600',
+            fontSize: '10.5px',
+            fontWeight: '700',
             textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            color: 'var(--primary)',
-            marginBottom: '4px'
+            letterSpacing: '0.4px',
+            color: 'var(--purple-main)',
+            marginBottom: '3px'
           }}>
             {recipe.category?.name || 'Resep Praktis'}
           </div>
 
           {/* Recipe Name */}
-          <h3 style={{
-            fontSize: '16.5px',
-            fontWeight: '700',
-            color: 'var(--text-main)',
-            marginBottom: '6px',
-            lineHeight: 1.3
-          }}>
+          <h3 className="recipe-card-title">
             {recipe.name}
           </h3>
 
           {/* Short description */}
-          <p style={{
-            fontSize: '13px',
-            color: 'var(--text-muted)',
-            lineHeight: 1.45,
-            marginBottom: '12px',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}>
+          <p className="recipe-card-desc">
             {recipe.description}
           </p>
         </div>
@@ -176,16 +170,18 @@ export const RecipeCard = ({ recipe }) => {
         {/* Card Footer: Cost & Duration Meta */}
         <div style={{
           borderTop: '1px solid var(--border-subtle)',
-          paddingTop: '12px',
+          paddingTop: '8px',
+          marginTop: '6px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          gap: '6px'
         }}>
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: '500' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: '500' }}>
               Estimasi Biaya
             </div>
-            <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary)' }}>
+            <div style={{ fontSize: '13.5px', fontWeight: '800', color: 'var(--primary)' }}>
               {formatRupiah(recipe.estimated_cost)}
             </div>
           </div>
@@ -193,15 +189,16 @@ export const RecipeCard = ({ recipe }) => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '5px',
-            fontSize: '12.5px',
+            gap: '4px',
+            fontSize: '11px',
             color: 'var(--text-muted)',
             fontWeight: '600',
             background: 'var(--bg-secondary)',
-            padding: '5px 10px',
-            borderRadius: '999px'
+            padding: '4px 8px',
+            borderRadius: '999px',
+            whiteSpace: 'nowrap'
           }}>
-            <Clock size={13} color="var(--primary)" />
+            <Clock size={12} color="var(--primary)" />
             <span>{formatTime(recipe.cooking_time)}</span>
           </div>
         </div>

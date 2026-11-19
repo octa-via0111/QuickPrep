@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Utensils, ArrowRight, Sparkles } from 'lucide-react';
+import { Heart, Utensils, ArrowRight } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import RecipeCard from '../components/RecipeCard.jsx';

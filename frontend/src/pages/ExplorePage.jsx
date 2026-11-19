@@ -7,8 +7,7 @@ import {
   Clock, 
   Wallet, 
   Utensils, 
-  RotateCcw,
-  Sparkles
+  RotateCcw
 } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';

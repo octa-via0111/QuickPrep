@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Check, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Check, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
 
 export const SubstitutionModal = ({ 
   isOpen, 
@@ -99,7 +99,7 @@ export const SubstitutionModal = ({
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
-                      <Sparkles size={14} />
+                      <RefreshCw size={13} />
                     </div>
                     <span style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>
                       {sub.substitute_ingredient}

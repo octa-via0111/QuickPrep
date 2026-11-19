@@ -7,7 +7,7 @@ import {
   Volume2, 
   History, 
   Check, 
-  Sparkles, 
+  Disc3, 
   Info,
   Clock,
   Star,
@@ -15,10 +15,8 @@ import {
   Trash2,
   UtensilsCrossed,
   ShieldCheck,
-  Smartphone,
   Layers,
   ChefHat,
-  HeartHandshake,
   CheckSquare,
   Square
 } from 'lucide-react';
@@ -33,11 +31,11 @@ import toolService from '../services/toolService.js';
 import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
 
 const AVATAR_THEMES = [
+  { color: '#260F3D', label: 'Ungu Gelap' },
   { color: '#E0623A', label: 'Terracotta' },
-  { color: '#5B8266', label: 'Sage' },
+  { color: '#4E7C5D', label: 'Sage' },
   { color: '#2563EB', label: 'Blue' },
   { color: '#D97706', label: 'Amber' },
-  { color: '#7C3AED', label: 'Violet' },
   { color: '#4B5563', label: 'Slate' }
 ];
 
@@ -338,58 +336,44 @@ export const ProfilePage = () => {
         {/* Hero Branding About */}
         <div className="card" style={{
           padding: '32px 24px',
-          background: 'linear-gradient(135deg, #E0623A 0%, #C85228 100%)',
+          background: 'linear-gradient(135deg, #260F3D 0%, #431C75 45%, #E0623A 100%)',
           color: '#FFFFFF',
           textAlign: 'center',
-          boxShadow: 'var(--shadow-warm)'
+          boxShadow: '0 8px 28px rgba(38, 15, 61, 0.25)'
         }}>
           <div style={{
             width: '56px',
             height: '56px',
             borderRadius: '16px',
             background: '#FFFFFF',
-            color: 'var(--primary)',
+            color: 'var(--purple-dark)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 12px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+            boxShadow: '0 4px 16px rgba(0,0,0,0.18)'
           }}>
             <UtensilsCrossed size={30} />
           </div>
 
           <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#FFF', marginBottom: '6px' }}>
-            QuickPrep PWA
+            QuickPrep
           </h2>
           <p style={{
             fontSize: '14.5px',
             color: 'rgba(255, 255, 255, 0.95)',
             fontStyle: 'italic',
             fontWeight: '600',
-            marginBottom: '16px'
+            marginBottom: '4px'
           }}>
             "Cook what you have. Spend what you can. Make it simple."
           </p>
-
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(4px)',
-            padding: '6px 14px',
-            borderRadius: '999px',
-            fontSize: '12.5px',
-            fontWeight: '700'
-          }}>
-            <Smartphone size={14} /> Versi 1.0.0 (Progressive Web App)
-          </div>
         </div>
 
         {/* Visi & Deskripsi */}
         <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
           <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ChefHat size={20} color="var(--primary)" />
+            <ChefHat size={20} color="var(--purple-main)" />
             <span>Visi dan Tujuan Aplikasi</span>
           </h3>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '14px' }}>
@@ -403,13 +387,13 @@ export const ProfilePage = () => {
         {/* Fitur Utama Aplikasi */}
         <div className="card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles size={20} color="var(--primary)" />
+            <Disc3 size={20} color="var(--primary)" />
             <span>Fitur Utama QuickPrep</span>
           </h3>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
             <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--purple-main)', marginBottom: '4px' }}>
                 1. Recipe Spin Wheel
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
@@ -418,7 +402,7 @@ export const ProfilePage = () => {
             </div>
 
             <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--sage)', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
                 2. Cook on Budget
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
@@ -436,7 +420,7 @@ export const ProfilePage = () => {
             </div>
 
             <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--purple-main)', marginBottom: '4px' }}>
                 4. Missing Ingredients
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
@@ -454,52 +438,12 @@ export const ProfilePage = () => {
             </div>
 
             <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontWeight: '800', fontSize: '14px', color: '#D97706', marginBottom: '4px' }}>
-                6. Offline Ready PWA
+              <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)', marginBottom: '4px' }}>
+                6. Progressive Web App (PWA)
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Dapat diinstal langsung ke perangkat dengan dukungan offline caching melalui Service Worker.
+                Dapat diinstal langsung ke perangkat dengan performa cepat dan dukungan caching melalui Service Worker.
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Arsitektur Teknologi */}
-        <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Layers size={20} color="var(--sage)" />
-            <span>Arsitektur dan Teknologi</span>
-          </h3>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
-            <div><strong>Frontend:</strong> React JS, Vite, JavaScript ES6, React Router DOM, Axios, Lucide Icons</div>
-            <div><strong>Backend:</strong> Node.js, Express.js REST API, CORS, Validator & Error Handler Middleware</div>
-            <div><strong>Database:</strong> Supabase PostgreSQL (8 Tabel Relasional & Indexing)</div>
-            <div><strong>PWA:</strong> Web App Manifest, Service Worker Caching, Offline Fallback, Install Prompt</div>
-          </div>
-        </div>
-
-        {/* Tim Pengembang */}
-        <div className="card" style={{ padding: '24px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <HeartHandshake size={20} color="var(--primary)" />
-            <span>Tim Pengembang Aplikasi</span>
-          </h3>
-          <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '16px' }}>
-            Aplikasi ini dikembangkan sebagai Tugas Akhir Praktikum Pemrograman Web / Progressive Web App (PWA) oleh <strong>Kelompok 21 Shift 03</strong>.
-          </p>
-
-          <div style={{
-            padding: '16px',
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            borderLeft: '4px solid var(--primary)'
-          }}>
-            <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--text-main)' }}>
-              Tugas Akhir Praktikum PWA
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Kelompok 21 | Shift 03 | Praktikum Pengembangan Aplikasi Web
             </div>
           </div>
 
@@ -508,7 +452,12 @@ export const ProfilePage = () => {
               <button
                 onClick={promptPWAInstall}
                 className="btn-primary"
-                style={{ width: '100%', padding: '12px', fontSize: '14px' }}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '14px',
+                  background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)'
+                }}
               >
                 <Download size={16} />
                 <span>Install QuickPrep ke Layar Utama</span>

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Sparkles, RotateCw, ArrowRight, Utensils, Clock, CheckCircle } from 'lucide-react';
+import { Disc3, RotateCw, ArrowRight, Utensils, Clock, CheckCircle } from 'lucide-react';
 import { formatRupiah, formatTime } from '../utils/formatter.js';
 
 // Web Audio API tick generator
@@ -30,14 +30,14 @@ const playWheelTick = () => {
 };
 
 const WHEEL_COLORS = [
+  '#260F3D', // Deep Purple
   '#E0623A', // Terracotta
-  '#5B8266', // Sage Green
+  '#4E7C5D', // Sage Green
   '#F59E0B', // Amber
+  '#431C75', // Royal Plum
   '#D97706', // Warm Ochre
   '#2563EB', // Soft Blue
-  '#E11D48', // Coral Red
-  '#8B5CF6', // Soft Violet
-  '#10B981'  // Emerald
+  '#C85228'  // Dark Terracotta
 ];
 
 export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
@@ -234,7 +234,9 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
           fontWeight: '700',
           cursor: spinning ? 'not-allowed' : 'pointer',
           opacity: spinning ? 0.75 : 1,
-          transform: spinning ? 'scale(0.98)' : 'scale(1)'
+          transform: spinning ? 'scale(0.98)' : 'scale(1)',
+          background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
+          boxShadow: '0 6px 20px rgba(38, 15, 61, 0.3)'
         }}
       >
         <RotateCw size={20} className={spinning ? 'animate-spin' : ''} />

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { 
   Home, 
   Compass, 
-  Sparkles, 
+  Disc3, 
   Heart, 
   User 
 } from 'lucide-react';
@@ -18,7 +18,7 @@ export const BottomNav = () => {
     { 
       to: '/spin', 
       label: 'Spin', 
-      icon: Sparkles,
+      icon: Disc3,
       isSpecial: true 
     },
     { 
@@ -36,16 +36,16 @@ export const BottomNav = () => {
       bottom: 0,
       left: 0,
       right: 0,
-      height: '66px',
-      background: 'rgba(255, 253, 249, 0.96)',
-      backdropFilter: 'blur(12px)',
+      height: '64px',
+      background: 'rgba(255, 253, 250, 0.97)',
+      backdropFilter: 'blur(14px)',
       borderTop: '1px solid var(--border-subtle)',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'stretch',
       justifyContent: 'space-around',
-      padding: '0 8px',
+      padding: '0 4px',
       zIndex: 90,
-      boxShadow: '0 -4px 20px rgba(46, 35, 31, 0.05)'
+      boxShadow: '0 -4px 20px rgba(38, 15, 61, 0.06)'
     }}>
       {navItems.map((item) => {
         const IconComponent = item.icon;
@@ -55,17 +55,23 @@ export const BottomNav = () => {
             key={item.to}
             to={item.to}
             end={item.to === '/'}
+            className="bottom-nav-link"
             style={({ isActive }) => ({
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '3px',
-              padding: '6px 12px',
+              padding: '6px 0 8px 0',
               color: isActive ? 'var(--primary)' : 'var(--text-muted)',
               textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              position: 'relative'
+              transition: 'color 0.2s ease',
+              position: 'relative',
+              outline: 'none',
+              border: 'none',
+              WebkitTapHighlightColor: 'transparent',
+              background: 'transparent'
             })}
           >
             {({ isActive }) => (
@@ -73,28 +79,29 @@ export const BottomNav = () => {
                 {/* Special Spin Floating Center Style */}
                 {item.isSpecial ? (
                   <div style={{
-                    width: '42px',
-                    height: '42px',
+                    width: '46px',
+                    height: '46px',
                     borderRadius: '50%',
                     background: isActive 
-                      ? 'linear-gradient(135deg, #E0623A, #C85228)' 
-                      : 'linear-gradient(135deg, #E0623A, #F59E0B)',
+                      ? 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)' 
+                      : 'linear-gradient(135deg, #3B165E 0%, #E0623A 100%)',
                     color: '#FFFFFF',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginTop: '-18px',
-                    boxShadow: '0 4px 14px rgba(224, 98, 58, 0.35)',
+                    marginTop: '-22px',
+                    boxShadow: '0 6px 18px rgba(38, 15, 61, 0.35)',
                     transform: isActive ? 'scale(1.08)' : 'scale(1)',
-                    transition: 'transform 0.2s ease'
+                    transition: 'all 0.25s ease',
+                    border: '3px solid #FFFDF9'
                   }}>
-                    <IconComponent size={20} />
+                    <IconComponent size={23} strokeWidth={2.2} />
                   </div>
                 ) : (
                   <div style={{ position: 'relative' }}>
                     <IconComponent 
                       size={22} 
-                      strokeWidth={isActive ? 2.4 : 1.9}
+                      strokeWidth={isActive ? 2.4 : 1.8}
                       fill={item.label === 'Favorit' && isActive ? 'var(--primary)' : 'none'}
                     />
                     {item.badge && (
@@ -123,20 +130,23 @@ export const BottomNav = () => {
                 <span style={{
                   fontSize: '11px',
                   fontWeight: isActive ? '700' : '500',
-                  letterSpacing: '-0.1px'
+                  letterSpacing: '-0.1px',
+                  color: isActive ? 'var(--primary)' : 'var(--text-muted)'
                 }}>
                   {item.label}
                 </span>
 
-                {/* Subtle active dot */}
+                {/* Garis Bawah Aktif (Underline Indicator, Tanpa Kotak) */}
                 {isActive && !item.isSpecial && (
                   <div style={{
                     position: 'absolute',
-                    bottom: '2px',
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    background: 'var(--primary)'
+                    bottom: 0,
+                    left: '22%',
+                    right: '22%',
+                    height: '3px',
+                    borderRadius: '3px 3px 0 0',
+                    background: 'var(--primary)',
+                    boxShadow: '0 -1px 6px rgba(224, 98, 58, 0.4)'
                   }} />
                 )}
               </>

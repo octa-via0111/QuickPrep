@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, SlidersHorizontal, RotateCw, Filter, Check } from 'lucide-react';
+import { Disc3, SlidersHorizontal, RotateCw, Filter, Check } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
 import toolService from '../services/toolService.js';
@@ -39,17 +39,18 @@ export const SpinPage = () => {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          background: '#FEF3C7',
-          color: '#D97706',
-          padding: '4px 14px',
+          background: 'var(--purple-light)',
+          color: 'var(--purple-main)',
+          border: '1px solid var(--purple-border)',
+          padding: '5px 14px',
           borderRadius: '999px',
           fontSize: '12.5px',
           fontWeight: '700',
           marginBottom: '8px'
         }}>
-          <Sparkles size={15} /> Fitur Unik QuickPrep
+          <Disc3 size={15} /> Fitur Unik QuickPrep
         </div>
-        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '6px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '6px', color: 'var(--purple-dark)' }}>
           Recipe <span style={{ color: 'var(--primary)' }}>Spin Wheel</span>
         </h1>
         <p style={{ fontSize: '14.5px', color: 'var(--text-muted)' }}>

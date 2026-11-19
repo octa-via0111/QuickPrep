@@ -1,22 +1,35 @@
-/* QuickPrep Design System - Modern Cozy Kitchen */
+/* QuickPrep Design System - Cozy Kitchen with Deep Royal Purple Accent */
 :root {
-  --bg-main: #FAF7F2;
+  --bg-main: #FAF7F4;
   --bg-card: #FFFFFF;
-  --bg-card-warm: #FFFDF9;
-  --bg-secondary: #F3EFEA;
+  --bg-card-warm: #FCF9F6;
+  --bg-secondary: #F3ECE5;
   
+  /* Primary Warm Terracotta */
   --primary: #E0623A;
   --primary-hover: #C85228;
   --primary-light: #FFEDE6;
   --primary-dark: #A33B18;
 
-  --text-main: #2E231F;
-  --text-muted: #726259;
-  --text-light: #A3948B;
+  /* Ungu Gelap (Deep Royal Purple / Plum) */
+  --purple-dark: #260F3D;
+  --purple-main: #3E1864;
+  --purple-accent: #5D268E;
+  --purple-light: #F4EEFB;
+  --purple-border: #E5D6F5;
+  --purple-hover: #351460;
+  --gradient-brand: linear-gradient(135deg, #260F3D 0%, #4A1B78 45%, #E0623A 100%);
+  --gradient-purple: linear-gradient(135deg, #260F3D 0%, #3E1864 100%);
+  --gradient-spin: linear-gradient(135deg, #3B165E 0%, #E0623A 100%);
 
-  --sage: #5B8266;
-  --sage-light: #EBF2EC;
-  --sage-dark: #3F5E48;
+  /* Typography Colors - Infused with Deep Plum Tone */
+  --text-main: #241432;
+  --text-muted: #665773;
+  --text-light: #9486A2;
+
+  --sage: #4E7C5D;
+  --sage-light: #EBF4EE;
+  --sage-dark: #375B43;
 
   --alert-red: #D9534F;
   --alert-red-light: #FDE8E8;
@@ -25,13 +38,14 @@
   --warning-amber: #D97706;
   --warning-amber-light: #FEF3C7;
 
-  --border-subtle: #EFE9E0;
+  --border-subtle: #ECE4DC;
   --border-focus: #E0623A;
 
-  --shadow-sm: 0 2px 8px rgba(46, 35, 31, 0.04);
-  --shadow-md: 0 6px 18px rgba(46, 35, 31, 0.07);
-  --shadow-lg: 0 12px 32px rgba(46, 35, 31, 0.1);
-  --shadow-warm: 0 8px 24px rgba(224, 98, 58, 0.18);
+  --shadow-sm: 0 2px 8px rgba(38, 15, 61, 0.04);
+  --shadow-md: 0 6px 18px rgba(38, 15, 61, 0.07);
+  --shadow-lg: 0 12px 32px rgba(38, 15, 61, 0.1);
+  --shadow-warm: 0 8px 24px rgba(224, 98, 58, 0.2);
+  --shadow-purple: 0 8px 24px rgba(62, 24, 100, 0.2);
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -225,25 +239,85 @@ button {
   color: var(--warning-amber);
 }
 
-/* Grid Layouts */
+.badge-purple {
+  background: var(--purple-light);
+  color: var(--purple-main);
+  border: 1px solid var(--purple-border);
+}
+
+/* Grid Layouts - 2 Kolom di Ponsel / Mobile */
 .grid-recipes {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 @media (min-width: 640px) {
   .grid-recipes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 860px) {
+  .grid-recipes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1100px) {
   .grid-recipes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
   }
+}
+
+/* Responsive Recipe Card Typography */
+.recipe-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.recipe-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .recipe-card-desc {
+    display: none; /* Sembunyikan deskripsi panjang di ponsel agar kartu tetap rapi dan ringkas */
+  }
+  .recipe-card-title {
+    font-size: 13px;
+    min-height: 34px;
+  }
+}
+
+/* Bottom Navigation Clean Style - Tanpa Kotak, Hanya Garis Bawah */
+.bottom-nav-link,
+.bottom-nav-link:focus,
+.bottom-nav-link:focus-visible,
+.bottom-nav-link:active,
+.bottom-nav-link:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 /* Skeleton Loading Animation */
