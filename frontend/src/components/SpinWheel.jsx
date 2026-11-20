@@ -235,8 +235,8 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
           cursor: spinning ? 'not-allowed' : 'pointer',
           opacity: spinning ? 0.75 : 1,
           transform: spinning ? 'scale(0.98)' : 'scale(1)',
-          background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
-          boxShadow: '0 6px 20px rgba(38, 15, 61, 0.3)'
+          background: 'var(--purple-dark)',
+          boxShadow: 'var(--shadow-purple)'
         }}
       >
         <RotateCw size={20} className={spinning ? 'animate-spin' : ''} />

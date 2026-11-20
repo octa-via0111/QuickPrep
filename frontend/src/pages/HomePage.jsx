@@ -63,8 +63,8 @@ export const HomePage = () => {
             style={{
               padding: '10px 18px',
               fontSize: '13.5px',
-              background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
-              boxShadow: '0 4px 14px rgba(38, 15, 61, 0.25)'
+              background: 'var(--purple-dark)',
+              boxShadow: 'var(--shadow-purple)'
             }}
           >
             <Disc3 size={16} />
@@ -90,15 +90,15 @@ export const HomePage = () => {
         </form>
       </section>
 
-      {/* 2. Hero Cozy Banner QuickPrep */}
+      {/* 2. Hero Cozy Banner QuickPrep (Solid Ungu Gelap) */}
       <section style={{
         position: 'relative',
-        background: 'linear-gradient(135deg, #260F3D 0%, #431C75 45%, #E0623A 100%)',
+        background: 'var(--purple-dark)',
         borderRadius: 'var(--radius-xl)',
         padding: '28px 24px',
         color: '#FFFFFF',
         overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(38, 15, 61, 0.2)'
+        boxShadow: 'var(--shadow-purple)'
       }}>
         {/* Background decorative pattern circles */}
         <div style={{
@@ -108,7 +108,7 @@ export const HomePage = () => {
           width: '180px',
           height: '180px',
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.08)'
+          background: 'rgba(255, 255, 255, 0.05)'
         }} />
         <div style={{
           position: 'absolute',
@@ -117,7 +117,7 @@ export const HomePage = () => {
           width: '120px',
           height: '120px',
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.06)'
+          background: 'rgba(255, 255, 255, 0.03)'
         }} />
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '580px' }}>
@@ -125,8 +125,8 @@ export const HomePage = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            background: 'rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(4px)',
+            background: 'var(--amber)',
+            color: '#FFFFFF',
             padding: '4px 12px',
             borderRadius: '999px',
             fontSize: '12px',
@@ -148,8 +148,8 @@ export const HomePage = () => {
             <Link
               to="/budget"
               style={{
-                background: '#FFFFFF',
-                color: 'var(--primary)',
+                background: 'var(--primary)',
+                color: '#FFFFFF',
                 fontWeight: '700',
                 fontSize: '13.5px',
                 padding: '10px 18px',
@@ -157,7 +157,7 @@ export const HomePage = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                boxShadow: 'var(--shadow-warm)'
               }}
             >
               <Wallet size={16} />
@@ -167,10 +167,9 @@ export const HomePage = () => {
             <Link
               to="/explore"
               style={{
-                background: 'rgba(255, 255, 255, 0.15)',
-                color: '#FFFFFF',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                fontWeight: '600',
+                background: '#FFFFFF',
+                color: 'var(--purple-dark)',
+                fontWeight: '700',
                 fontSize: '13.5px',
                 padding: '10px 18px',
                 borderRadius: '999px',

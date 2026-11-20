@@ -82,9 +82,7 @@ export const BottomNav = () => {
                     width: '46px',
                     height: '46px',
                     borderRadius: '50%',
-                    background: isActive 
-                      ? 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)' 
-                      : 'linear-gradient(135deg, #3B165E 0%, #E0623A 100%)',
+                    background: 'var(--purple-dark)',
                     color: '#FFFFFF',
                     display: 'flex',
                     alignItems: 'center',

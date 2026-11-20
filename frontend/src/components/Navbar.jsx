@@ -59,7 +59,7 @@ export const Navbar = () => {
             width: '38px',
             height: '38px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
+            background: 'var(--purple-dark)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -138,8 +138,8 @@ export const Navbar = () => {
               style={{
                 padding: '7px 15px',
                 fontSize: '13px',
-                background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)',
-                boxShadow: '0 4px 12px rgba(38, 15, 61, 0.25)'
+                background: 'var(--primary)',
+                boxShadow: 'var(--shadow-warm)'
               }}
             >
               <Download size={14} />

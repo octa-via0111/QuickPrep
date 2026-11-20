@@ -1,42 +1,44 @@
-/* QuickPrep Design System - Cozy Kitchen with Deep Royal Purple Accent */
+/* QuickPrep Design System - Solid Palette (Ungu Gelap, Terracotta, Sage, Amber) */
 :root {
   --bg-main: #FAF7F4;
   --bg-card: #FFFFFF;
   --bg-card-warm: #FCF9F6;
   --bg-secondary: #F3ECE5;
   
-  /* Primary Warm Terracotta */
+  /* Solid Warna Utama 1: Terracotta (Oranye Hangat) */
   --primary: #E0623A;
   --primary-hover: #C85228;
   --primary-light: #FFEDE6;
   --primary-dark: #A33B18;
 
-  /* Ungu Gelap (Deep Royal Purple / Plum) */
+  /* Solid Warna Utama 2: Ungu Gelap (Deep Royal Purple) */
   --purple-dark: #260F3D;
-  --purple-main: #3E1864;
-  --purple-accent: #5D268E;
+  --purple-main: #381559;
+  --purple-hover: #351458;
   --purple-light: #F4EEFB;
   --purple-border: #E5D6F5;
-  --purple-hover: #351460;
-  --gradient-brand: linear-gradient(135deg, #260F3D 0%, #4A1B78 45%, #E0623A 100%);
-  --gradient-purple: linear-gradient(135deg, #260F3D 0%, #3E1864 100%);
-  --gradient-spin: linear-gradient(135deg, #3B165E 0%, #E0623A 100%);
 
-  /* Typography Colors - Infused with Deep Plum Tone */
-  --text-main: #241432;
-  --text-muted: #665773;
-  --text-light: #9486A2;
-
+  /* Solid Warna 3: Sage Green (Hijau Sage Alami) */
   --sage: #4E7C5D;
   --sage-light: #EBF4EE;
   --sage-dark: #375B43;
 
+  /* Solid Warna 4: Amber / Kuning Mustard */
+  --amber: #D97706;
+  --amber-light: #FEF3C7;
+  --warning-amber: #D97706;
+  --warning-amber-light: #FEF3C7;
+
+  /* Solid Status Colors */
   --alert-red: #D9534F;
   --alert-red-light: #FDE8E8;
   --success-green: #2E7D32;
   --success-green-light: #E8F5E9;
-  --warning-amber: #D97706;
-  --warning-amber-light: #FEF3C7;
+
+  /* Typography Colors */
+  --text-main: #241432;
+  --text-muted: #665773;
+  --text-light: #9486A2;
 
   --border-subtle: #ECE4DC;
   --border-focus: #E0623A;
@@ -45,7 +47,7 @@
   --shadow-md: 0 6px 18px rgba(38, 15, 61, 0.07);
   --shadow-lg: 0 12px 32px rgba(38, 15, 61, 0.1);
   --shadow-warm: 0 8px 24px rgba(224, 98, 58, 0.2);
-  --shadow-purple: 0 8px 24px rgba(62, 24, 100, 0.2);
+  --shadow-purple: 0 8px 24px rgba(38, 15, 61, 0.25);
 
   --radius-sm: 8px;
   --radius-md: 14px;

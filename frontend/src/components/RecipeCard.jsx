@@ -56,16 +56,6 @@ export const RecipeCard = ({ recipe }) => {
           }}
         />
 
-        {/* Gradient shadow for contrast */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '60px',
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%)'
-        }} />
-
         {/* Difficulty Badge Top Left */}
         <div style={{
           position: 'absolute',

@@ -333,13 +333,13 @@ export const ProfilePage = () => {
 
       {/* 4. Bagian Tentang QuickPrep (About) */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {/* Hero Branding About */}
+        {/* Hero Branding About (Solid Ungu Gelap) */}
         <div className="card" style={{
           padding: '32px 24px',
-          background: 'linear-gradient(135deg, #260F3D 0%, #431C75 45%, #E0623A 100%)',
+          background: 'var(--purple-dark)',
           color: '#FFFFFF',
           textAlign: 'center',
-          boxShadow: '0 8px 28px rgba(38, 15, 61, 0.25)'
+          boxShadow: 'var(--shadow-purple)'
         }}>
           <div style={{
             width: '56px',
@@ -456,7 +456,8 @@ export const ProfilePage = () => {
                   width: '100%',
                   padding: '12px',
                   fontSize: '14px',
-                  background: 'linear-gradient(135deg, #260F3D 0%, #E0623A 100%)'
+                  background: 'var(--primary)',
+                  boxShadow: 'var(--shadow-warm)'
                 }}
               >
                 <Download size={16} />
