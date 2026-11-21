@@ -654,35 +654,19 @@ export const RecipeDetailPage = () => {
         </div>
       </section>
 
-      {/* Floating Bottom Cook Action for Mobile */}
-      <div style={{
-        position: 'sticky',
-        bottom: '76px',
-        zIndex: 40,
-        background: 'rgba(255, 253, 249, 0.95)',
-        backdropFilter: 'blur(8px)',
-        padding: '12px',
-        borderRadius: 'var(--radius-full)',
-        boxShadow: 'var(--shadow-lg)',
-        border: '1px solid var(--border-subtle)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Siap Memasak?</div>
-          <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--primary)' }}>
-            {recipe.name}
-          </div>
+      {/* Floating Bottom Cook Action (Kompak di pojok kanan & responsif) */}
+      <div className="floating-cook-action">
+        <div className="floating-cook-info">
+          <span className="floating-cook-subtitle">Siap Masak?</span>
+          <span className="floating-cook-title">{recipe.name}</span>
         </div>
 
         <Link
           to={`/cook/${recipe.id}`}
           state={{ appliedSubstitutions }}
-          className="btn-primary"
-          style={{ padding: '10px 20px', fontSize: '13.5px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          className="btn-primary floating-cook-btn"
         >
-          <Play size={16} fill="currentColor" />
+          <Play size={14} fill="currentColor" />
           <span>Mulai Masak</span>
         </Link>
       </div>
