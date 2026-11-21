@@ -30,7 +30,8 @@ export const authService = {
       const pass = (password || '').trim();
 
       // Cek Administrator
-      if (iden === 'admin' && pass === 'admin123') {
+      const isAdminIdentifier = ['admin', 'admin@quickprep.com', 'admin@gmail.com', 'administrator'].includes(iden);
+      if (isAdminIdentifier && pass === 'admin123') {
         userData = {
           id: 'admin-super',
           username: 'admin',

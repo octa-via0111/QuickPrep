@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (data) => {
     const res = await authService.unifiedLogin(data);
     setCurrentUser(authService.getUser());
-    closeLogin();
     return res;
   };
 

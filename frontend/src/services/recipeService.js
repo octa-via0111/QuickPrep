@@ -345,6 +345,8 @@ export const recipeService = {
       return await api.put(`/recipes/${id}`, recipeData);
     } catch (apiErr) {
       if (isSupabaseConfigured && supabase) {
+        const cost = Number(recipeData.estimated_cost) || 10000;
+        const srv = Number(recipeData.servings) || 1;
         const updates = {
           name: recipeData.name,
           description: recipeData.description,
@@ -352,14 +354,16 @@ export const recipeService = {
           category_id: recipeData.category_id,
           cooking_time: Number(recipeData.cooking_time),
           preparation_time: Number(recipeData.preparation_time),
-          estimated_cost: Number(recipeData.estimated_cost),
-          servings: Number(recipeData.servings),
+          estimated_cost: cost,
+          cost_per_serving: Math.round(cost / srv),
+          servings: srv,
           difficulty: recipeData.difficulty,
+          instructions: Array.isArray(recipeData.instructions) ? recipeData.instructions : [],
           tips: recipeData.tips,
           is_popular: Boolean(recipeData.is_popular),
           is_kos_friendly: Boolean(recipeData.is_kos_friendly),
-          source_url: recipeData.source_url || null,
-          source_name: recipeData.source_name || null
+          source_url: recipeData.source_url ? recipeData.source_url.trim() : null,
+          source_name: recipeData.source_name ? recipeData.source_name.trim() : null
         };
 
         const { data, error } = await supabase
