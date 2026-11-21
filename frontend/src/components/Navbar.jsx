@@ -13,10 +13,11 @@ import {
   Moon
 } from 'lucide-react';
 import useOnlineStatus from '../hooks/useOnlineStatus.js';
-import { subscribeToInstallPrompt, promptPWAInstall } from '../utils/pwa.js';
+import { subscribeToInstallPrompt, promptPWAInstall, isAppInstalled } from '../utils/pwa.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
+import InstallAppModal from './InstallAppModal.jsx';
 
 export const Navbar = () => {
   const isOnline = useOnlineStatus();
@@ -26,6 +27,8 @@ export const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
   
   const [canInstall, setCanInstall] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(() => isAppInstalled());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -33,7 +36,15 @@ export const Navbar = () => {
     const unsubscribe = subscribeToInstallPrompt((supported) => {
       setCanInstall(supported);
     });
-    return unsubscribe;
+    
+    // Check if app gets installed
+    const handleInstalled = () => setIsStandalone(true);
+    window.addEventListener('appinstalled', handleInstalled);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('appinstalled', handleInstalled);
+    };
   }, []);
 
   // Close dropdown menu when clicking outside
@@ -77,26 +88,28 @@ export const Navbar = () => {
         gap: '16px'
       }}>
         {/* Brand Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
-            background: 'var(--purple-dark)',
+            width: '40px',
+            height: '40px',
+            borderRadius: '13px',
+            background: '#260F3D',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#FFFFFF',
-            boxShadow: '0 4px 14px rgba(38, 15, 61, 0.25)'
+            boxShadow: '0 4px 14px rgba(38, 15, 61, 0.35)',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            flexShrink: 0
           }}>
-            <UtensilsCrossed size={20} />
+            <UtensilsCrossed size={22} strokeWidth={2.4} />
           </div>
           <div>
             <div style={{
-              fontSize: '19px',
+              fontSize: '20px',
               fontWeight: '800',
-              letterSpacing: '-0.3px',
-              color: 'var(--purple-dark)',
+              letterSpacing: '-0.4px',
+              color: 'var(--text-main)',
               lineHeight: 1.1
             }}>
               Quick<span style={{ color: 'var(--primary)' }}>Prep</span>
@@ -351,29 +364,56 @@ export const Navbar = () => {
             </div>
           )}
 
-          {/* PWA Install Button if available */}
-          {canInstall && (
+          {/* Tombol Download / Install App */}
+          {!isStandalone && (
             <button
-              onClick={promptPWAInstall}
-              className="btn-primary"
+              onClick={() => {
+                if (canInstall) {
+                  promptPWAInstall().then(accepted => {
+                    if (!accepted) setIsInstallModalOpen(true);
+                  });
+                } else {
+                  setIsInstallModalOpen(true);
+                }
+              }}
+              title="Download / Instal Aplikasi QuickPrep"
               style={{
                 padding: '7px 15px',
+                borderRadius: '999px',
                 fontSize: '13px',
-                background: 'var(--primary)',
-                boxShadow: 'var(--shadow-warm)'
+                fontWeight: '700',
+                background: 'var(--purple-dark)',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: '0 4px 12px rgba(38, 15, 61, 0.25)',
+                transition: 'all 0.15s ease'
               }}
             >
               <Download size={14} />
-              <span>Install App</span>
+              <span className="install-label">Download App</span>
             </button>
           )}
         </div>
       </div>
 
+      {/* Modal Panduan Download & Instalasi Aplikasi */}
+      <InstallAppModal 
+        isOpen={isInstallModalOpen} 
+        onClose={() => setIsInstallModalOpen(false)} 
+        canInstallNative={canInstall} 
+      />
+
       <style>{`
         @media (max-width: 820px) {
           .desktop-nav {
             display: none !important;
+          }
+          .install-label {
+            display: none;
           }
         }
       `}</style>

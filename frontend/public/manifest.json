@@ -1,27 +1,46 @@
 {
-  "name": "QuickPrep - Panduan Memasak Praktis & Cerdas",
+  "name": "QuickPrep",
   "short_name": "QuickPrep",
-  "description": "Cook what you have. Spend what you can. Make it simple. Panduan memasak hemat, ramah anak kos dengan fitur Recipe Spin, filter alat, dan panduan suara.",
+  "description": "Cook what you have. Spend what you can. Panduan memasak cerdas, hemat, dan ramah anak kos.",
   "start_url": "/",
   "id": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FAF7F2",
-  "theme_color": "#E0623A",
+  "background_color": "#260F3D",
+  "theme_color": "#260F3D",
   "lang": "id",
+  "categories": ["food", "lifestyle", "utilities"],
   "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/icons/icon-192x192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/favicon.svg",

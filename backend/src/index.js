@@ -48,11 +48,14 @@ app.use('/api/cooking-history', historyRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`  QuickPrep REST API Server Aktif di Port ${PORT}`);
-  console.log(`  http://localhost:${PORT}/api/health`);
-  console.log(`===============================================`);
-});
+// Start server locally (skip listen on Vercel serverless environment)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`  QuickPrep REST API Server Aktif di Port ${PORT}`);
+    console.log(`  http://localhost:${PORT}/api/health`);
+    console.log(`===============================================`);
+  });
+}
 
 export default app;

@@ -1,11 +1,16 @@
 // QuickPrep Service Worker
-const CACHE_NAME = 'quickprep-v1.0.0';
+const CACHE_NAME = 'quickprep-v1.1.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon.svg',
+  '/favicon.png',
+  '/apple-touch-icon.png',
   '/offline.html',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-maskable-512x512.png',
   '/icons/icon-192x192.svg',
   '/icons/icon-512x512.svg'
 ];

@@ -2,7 +2,7 @@ let deferredPrompt = null;
 const installListeners = new Set();
 
 export const registerServiceWorker = () => {
-  if ('serviceWorker' in navigator && process.env.NODE_ENV !== 'development') {
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator && (import.meta.env.PROD || import.meta.env.MODE === 'production')) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
@@ -16,9 +16,9 @@ export const registerServiceWorker = () => {
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    console.log('[PWA] Versi baru tersedia! Silakan muat ulang.');
+                    console.log('[PWA] Versi baru QuickPrep tersedia!');
                   } else {
-                    console.log('[PWA] Konten telah dicache untuk penggunaan offline.');
+                    console.log('[PWA] Konten telah dicache untuk offline.');
                   }
                 }
               };
@@ -31,18 +31,20 @@ export const registerServiceWorker = () => {
     });
   }
 
-  // Capture beforeinstallprompt event
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installListeners.forEach(listener => listener(true));
-  });
+  if (typeof window !== 'undefined') {
+    // Capture beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installListeners.forEach(listener => listener(true));
+    });
 
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    installListeners.forEach(listener => listener(false));
-    console.log('[PWA] Aplikasi QuickPrep berhasil diinstall!');
-  });
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      installListeners.forEach(listener => listener(false));
+      console.log('[PWA] Aplikasi QuickPrep berhasil diinstall!');
+    });
+  }
 };
 
 export const subscribeToInstallPrompt = (callback) => {
@@ -51,17 +53,31 @@ export const subscribeToInstallPrompt = (callback) => {
   return () => installListeners.delete(callback);
 };
 
+export const isAppInstalled = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+};
+
+export const hasNativeInstallPrompt = () => {
+  return Boolean(deferredPrompt);
+};
+
 export const promptPWAInstall = async () => {
   if (!deferredPrompt) return false;
-  deferredPrompt.prompt();
-  const choiceResult = await deferredPrompt.userChoice;
-  if (choiceResult.outcome === 'accepted') {
-    console.log('[PWA] Pengguna menyetujui instalasi aplikasi');
-    deferredPrompt = null;
-    installListeners.forEach(listener => listener(false));
-    return true;
-  } else {
-    console.log('[PWA] Pengguna menolak instalasi');
+  try {
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+    if (choiceResult.outcome === 'accepted') {
+      console.log('[PWA] Pengguna menyetujui instalasi aplikasi');
+      deferredPrompt = null;
+      installListeners.forEach(listener => listener(false));
+      return true;
+    } else {
+      console.log('[PWA] Pengguna menolak instalasi');
+      return false;
+    }
+  } catch (err) {
+    console.warn('[PWA] Prompt error:', err);
     return false;
   }
 };

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="800" height="240">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;display=swap');
+      .brand-title { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 78px; font-weight: 800; letter-spacing: -1.5px; fill: #260F3D; }
+      .brand-sub { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; font-size: 24px; font-weight: 600; fill: #7E7088; }
+      .brand-highlight { fill: #E0623A; }
+    </style>
+  </defs>
+  <!-- Background icon squircle -->
+  <rect x="30" y="30" width="180" height="180" rx="42" fill="#260F3D" />
+  <g transform="translate(120, 120) scale(5.1) translate(-12, -12)">
+    <g transform="scale(-1, 1) translate(-24, 0)" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8Z"/>
+      <path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/>
+      <path d="m2.1 21.8 6.4-6.3"/>
+      <path d="m19 5-7 7"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <text x="245" y="132" class="brand-title">Quick<tspan class="brand-highlight">Prep</tspan></text>
+  <text x="248" y="178" class="brand-sub">Cook what you have. Spend what you can.</text>
+</svg>

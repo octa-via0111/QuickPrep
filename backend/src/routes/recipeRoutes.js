@@ -40,18 +40,22 @@ router.post('/upload-image', async (req, res, next) => {
     const pureBase64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(pureBase64, 'base64');
 
-    // 1. Simpan ke folder frontend/public/recipes agar dapat disajikan langsung oleh Vite/server lokal
-    const publicRecipesDir = path.resolve(__dirname, '../../../frontend/public/recipes');
-    if (!fs.existsSync(publicRecipesDir)) {
-      fs.mkdirSync(publicRecipesDir, { recursive: true });
-    }
-    const publicFilePath = path.join(publicRecipesDir, finalName);
-    fs.writeFileSync(publicFilePath, buffer);
+    // 1. Simpan ke folder frontend/public/recipes jika filesystem dapat ditulis (misal lokal)
+    try {
+      const publicRecipesDir = path.resolve(__dirname, '../../../frontend/public/recipes');
+      if (!fs.existsSync(publicRecipesDir)) {
+        fs.mkdirSync(publicRecipesDir, { recursive: true });
+      }
+      const publicFilePath = path.join(publicRecipesDir, finalName);
+      fs.writeFileSync(publicFilePath, buffer);
 
-    // Salin juga ke frontend/dist/recipes jika folder build ada
-    const distRecipesDir = path.resolve(__dirname, '../../../frontend/dist/recipes');
-    if (fs.existsSync(distRecipesDir)) {
-      fs.writeFileSync(path.join(distRecipesDir, finalName), buffer);
+      // Salin juga ke frontend/dist/recipes jika folder build ada
+      const distRecipesDir = path.resolve(__dirname, '../../../frontend/dist/recipes');
+      if (fs.existsSync(distRecipesDir)) {
+        fs.writeFileSync(path.join(distRecipesDir, finalName), buffer);
+      }
+    } catch (fsErr) {
+      console.warn('[Storage] Filesystem lokal read-only, mengandalkan Supabase/Base64 URL:', fsErr.message);
     }
 
     let finalUrl = `/recipes/${finalName}`;

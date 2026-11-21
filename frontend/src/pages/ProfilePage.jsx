@@ -35,6 +35,7 @@ import toolService from '../services/toolService.js';
 import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
+import InstallAppModal from '../components/InstallAppModal.jsx';
 
 const AVATAR_THEMES = [
   { color: '#260F3D', label: 'Ungu Gelap' },
@@ -53,6 +54,7 @@ export const ProfilePage = () => {
   const [toolsList, setToolsList] = useState([]);
   const [savedAlert, setSavedAlert] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   // Otomatis sinkronkan data profil dengan akun yang sedang login
   useEffect(() => {
@@ -457,21 +459,22 @@ export const ProfilePage = () => {
           boxShadow: 'var(--shadow-purple)'
         }}>
           <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            background: '#FFFFFF',
-            color: 'var(--purple-dark)',
+            width: '64px',
+            height: '64px',
+            borderRadius: '18px',
+            background: '#260F3D',
+            color: '#FFFFFF',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 12px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.18)'
+            margin: '0 auto 14px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+            border: '2px solid rgba(255, 255, 255, 0.2)'
           }}>
-            <UtensilsCrossed size={30} />
+            <UtensilsCrossed size={36} strokeWidth={2.4} />
           </div>
 
-          <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#FFF', marginBottom: '6px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#FFF', marginBottom: '6px', letterSpacing: '-0.5px' }}>
             QuickPrep
           </h2>
           <p style={{
@@ -562,26 +565,46 @@ export const ProfilePage = () => {
             </div>
           </div>
 
-          {canInstall && (
-            <div style={{ marginTop: '20px' }}>
-              <button
-                onClick={promptPWAInstall}
-                className="btn-primary"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  background: 'var(--primary)',
-                  boxShadow: 'var(--shadow-warm)'
-                }}
-              >
-                <Download size={16} />
-                <span>Install QuickPrep ke Layar Utama</span>
-              </button>
-            </div>
-          )}
+          {/* Tombol Install & Download QuickPrep */}
+          <div style={{ marginTop: '20px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (canInstall) {
+                  promptPWAInstall().then(accepted => {
+                    if (!accepted) setIsInstallModalOpen(true);
+                  });
+                } else {
+                  setIsInstallModalOpen(true);
+                }
+              }}
+              className="btn-primary"
+              style={{
+                width: '100%',
+                padding: '13px',
+                fontSize: '14.5px',
+                fontWeight: '700',
+                background: 'var(--primary)',
+                boxShadow: 'var(--shadow-warm)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              <Download size={18} />
+              <span>Download & Pasang QuickPrep di HP / Laptop</span>
+            </button>
+          </div>
         </div>
       </section>
+
+      {/* Modal Petunjuk Instalasi */}
+      <InstallAppModal 
+        isOpen={isInstallModalOpen} 
+        onClose={() => setIsInstallModalOpen(false)} 
+        canInstallNative={canInstall} 
+      />
     </div>
   );
 };
