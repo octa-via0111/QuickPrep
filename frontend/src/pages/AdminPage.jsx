@@ -93,6 +93,36 @@ export const AdminPage = () => {
   });
 
   const [imagePreview, setImagePreview] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState('');
+
+  // Kompresi foto sebelum upload agar ringan (maks 800px, quality 80%)
+  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Load all initial data
   const loadData = async () => {
@@ -155,6 +185,7 @@ export const AdminPage = () => {
       ]
     });
     setImagePreview('/recipes/contoh.jpg');
+    setUploadedFileName('');
     setIsModalOpen(true);
   };
 
@@ -194,48 +225,61 @@ export const AdminPage = () => {
       instructions: parsedInstructions
     });
     setImagePreview(recipe.image_url || '');
+    setUploadedFileName(recipe.image_url?.startsWith('data:image/') ? 'Foto Masakan' : '');
     setIsModalOpen(true);
   };
 
-  // Handle file selection from File Manager dengan upload nyata ke server & Supabase
+  // Handle file selection from File Manager dengan kompresi & upload nyata
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Tampilkan pratinjau lokal sementara
-    const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);
+    if (!file.type.startsWith('image/')) {
+      showAlert('error', 'Silakan pilih file gambar yang valid (JPG, PNG, WebP).');
+      return;
+    }
 
     try {
       setUploadingImage(true);
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const base64Data = reader.result;
-          const res = await recipeService.uploadRecipeImage({
-            filename: file.name,
-            base64Data
-          });
-          const uploadedUrl = res?.data?.data?.imageUrl || res?.data?.imageUrl;
-          if (uploadedUrl) {
-            setFormData(prev => ({
-              ...prev,
-              image_url: uploadedUrl
-            }));
-            setImagePreview(uploadedUrl);
-            showAlert('success', 'Foto masakan berhasil diunggah ke server!');
-          }
-        } catch (uploadErr) {
-          console.error('Upload foto error:', uploadErr);
-          showAlert('error', 'Gagal mengunggah foto ke server. Silakan coba lagi.');
-        } finally {
-          setUploadingImage(false);
+      setUploadedFileName(file.name);
+
+      // Otomatis kompres gambar maksimal lebar 800px & kualitas 80%
+      const compressedBase64 = await compressImage(file, 800, 0.8);
+      setImagePreview(compressedBase64);
+
+      try {
+        const res = await recipeService.uploadRecipeImage({
+          filename: file.name,
+          base64Data: compressedBase64
+        });
+        const uploadedUrl = res?.data?.data?.imageUrl || res?.data?.imageUrl;
+        if (uploadedUrl && !uploadedUrl.startsWith('data:image/')) {
+          setFormData(prev => ({
+            ...prev,
+            image_url: uploadedUrl
+          }));
+          setImagePreview(uploadedUrl);
+          showAlert('success', 'Foto masakan berhasil diunggah ke server!');
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            image_url: compressedBase64
+          }));
+          showAlert('success', 'Foto masakan berhasil dimuat & dikompres!');
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (uploadErr) {
+        // Fallback simpan base64 yang sudah dikompres
+        setFormData(prev => ({
+          ...prev,
+          image_url: compressedBase64
+        }));
+        showAlert('success', 'Foto masakan berhasil dimuat dari perangkat!');
+      }
     } catch (err) {
-      setUploadingImage(false);
+      console.error('File compression error:', err);
       showAlert('error', 'Gagal memproses file foto.');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -1137,17 +1181,59 @@ export const AdminPage = () => {
 
                 {/* Input URL atau File Path */}
                 <div>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="Contoh: link URL https://... atau /recipes/..."
-                    value={formData.image_url}
-                    onChange={(e) => {
-                      const cleanVal = formatImageUrl(e.target.value.trim());
-                      setFormData({ ...formData, image_url: cleanVal });
-                      setImagePreview(cleanVal);
-                    }}
-                  />
+                  {formData.image_url && formData.image_url.startsWith('data:image/') ? (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      background: '#F8F9FA',
+                      border: '1.5px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '12.5px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Check size={16} color="var(--sage)" />
+                        <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>
+                          File Gambar Terpilih:
+                        </span>
+                        <span style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                          {uploadedFileName || 'Foto dari Perangkat'} ({(formData.image_url.length / 1024).toFixed(0)} KB)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, image_url: '' }));
+                          setImagePreview('');
+                          setUploadedFileName('');
+                        }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--accent-red)',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Ganti / Hapus
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder="Contoh: link URL https://... atau /recipes/..."
+                      value={formData.image_url}
+                      onChange={(e) => {
+                        const cleanVal = formatImageUrl(e.target.value.trim());
+                        setFormData({ ...formData, image_url: cleanVal });
+                        setImagePreview(cleanVal);
+                        setUploadedFileName('');
+                      }}
+                    />
+                  )}
                 </div>
 
                 {/* Upload dari File Manager */}
@@ -1166,7 +1252,7 @@ export const AdminPage = () => {
                     boxShadow: 'var(--shadow-purple)'
                   }}>
                     <FolderOpen size={15} />
-                    <span>{uploadingImage ? 'Mengunggah Foto ke Server...' : 'Pilih Foto dari File Manager'}</span>
+                    <span>{uploadingImage ? 'Mengompres & Memproses Foto...' : 'Pilih Foto dari File Manager'}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -1177,7 +1263,7 @@ export const AdminPage = () => {
                   </label>
 
                   <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                    {uploadingImage ? 'Sedang memproses upload...' : 'Foto langsung diunggah ke server & tersimpan di database'}
+                    {uploadingImage ? 'Sedang mengompres foto...' : 'Foto otomatis dioptimalkan agar ringan & hemat penyimpanan'}
                   </div>
                 </div>
 
@@ -1187,11 +1273,12 @@ export const AdminPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    padding: '8px',
+                    padding: '10px',
                     background: '#FFFFFF',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-sm)'
                   }}>
-                    <div style={{ width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-subtle)' }}>
                       <img
                         src={imagePreview}
                         alt="Preview"
@@ -1201,9 +1288,20 @@ export const AdminPage = () => {
                         }}
                       />
                     </div>
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)' }}>Pratinjau Foto Masakan</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{formData.image_url}</div>
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '2px' }}>Pratinjau Foto Masakan</div>
+                      <div style={{
+                        fontSize: '11.5px',
+                        color: 'var(--text-muted)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '350px'
+                      }}>
+                        {formData.image_url?.startsWith('data:image/')
+                          ? `📸 ${uploadedFileName || 'Foto Masakan'} (${(formData.image_url.length / 1024).toFixed(0)} KB)`
+                          : (formData.image_url?.length > 45 ? `${formData.image_url.substring(0, 45)}...` : (formData.image_url || 'Belum ada foto'))}
+                      </div>
                     </div>
                   </div>
                 )}
