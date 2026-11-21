@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { 
-  Volume2, 
-  VolumeX, 
   Play, 
-  Pause, 
   RotateCcw, 
   ChevronLeft, 
   ChevronRight, 
@@ -15,11 +12,12 @@ import {
   Star,
   Award,
   ArrowRight,
-  Sliders,
-  X
+  X,
+  ChefHat,
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
-import useSpeech from '../hooks/useSpeech.js';
 import CookingTimer from '../components/CookingTimer.jsx';
 import historyService from '../services/historyService.js';
 import { addStoredHistory } from '../utils/storage.js';
@@ -27,7 +25,11 @@ import { addStoredHistory } from '../utils/storage.js';
 export const CookingModePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { recipe, loading } = useRecipeDetail(id);
+
+  // Ambil data bahan pengganti jika ada yang dipilih dari RecipeDetailPage
+  const appliedSubstitutions = location.state?.appliedSubstitutions || {};
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
@@ -37,41 +39,68 @@ export const CookingModePage = () => {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showStepTimer, setShowStepTimer] = useState(false);
 
-  const {
-    supported,
-    isSpeaking,
-    isPaused,
-    speed,
-    changeSpeed,
-    speak,
-    pause,
-    resume,
-    replay,
-    stop
-  } = useSpeech();
+  // Otomatis sesuaikan instruksi langkah memasak jika ada bahan pengganti yang dipilih
+  const steps = useMemo(() => {
+    const rawSteps = recipe?.instructions || [];
+    if (!appliedSubstitutions || Object.keys(appliedSubstitutions).length === 0) {
+      return rawSteps;
+    }
 
-  const steps = recipe?.instructions || [];
+    const subList = [];
+    const recipeIngredients = recipe?.ingredients || [];
+
+    Object.entries(appliedSubstitutions).forEach(([idx, subName]) => {
+      const orig = recipeIngredients[idx]?.name || recipeIngredients[idx]?.originalName;
+      if (orig && subName) {
+        subList.push({ original: orig.trim(), substitute: subName.trim() });
+      }
+    });
+
+    if (subList.length === 0) return rawSteps;
+
+    return rawSteps.map(step => {
+      let text = step.instruction || '';
+      let isChanged = false;
+      const changes = [];
+
+      subList.forEach(({ original, substitute }) => {
+        const escaped = original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const reg = new RegExp(`\\b${escaped}\\b`, 'gi');
+        if (reg.test(text)) {
+          isChanged = true;
+          changes.push({ original, substitute });
+          text = text.replace(reg, substitute);
+        } else {
+          const parts = original.split(' ');
+          if (parts.length > 1 && parts[0].length >= 4) {
+            const partEsc = parts[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const partReg = new RegExp(`\\b${partEsc}\\b`, 'gi');
+            if (partReg.test(text)) {
+              isChanged = true;
+              changes.push({ original, substitute });
+              text = text.replace(partReg, substitute);
+            }
+          }
+        }
+      });
+
+      return {
+        ...step,
+        instruction: text,
+        isModifiedBySubstitution: isChanged,
+        substitutionChanges: changes
+      };
+    });
+  }, [recipe, appliedSubstitutions]);
+
   const currentStep = steps[currentStepIndex];
   const totalSteps = steps.length;
 
-  // Speak current instruction when requested or when user changes steps
-  const readCurrentInstruction = () => {
-    if (!currentStep) return;
-    const narrationText = `Langkah ke ${currentStep.step_number || currentStepIndex + 1}. ${currentStep.title}. ${currentStep.instruction}. ${currentStep.tips ? 'Tips penting: ' + currentStep.tips : ''}`;
-    speak(narrationText);
-  };
-
-  // Stop audio speech when leaving page
-  useEffect(() => {
-    return () => stop();
-  }, [stop]);
-
   const handleNextStep = () => {
-    stop();
     if (currentStepIndex < totalSteps - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
-      // Completed all steps!
+      // Selesai semua langkah memasak!
       setCompleted(true);
       try {
         confetti({
@@ -84,7 +113,6 @@ export const CookingModePage = () => {
   };
 
   const handlePrevStep = () => {
-    stop();
     if (currentStepIndex > 0) {
       setCurrentStepIndex(prev => prev - 1);
     }
@@ -103,14 +131,14 @@ export const CookingModePage = () => {
       notes: cookingNotes
     };
 
-    // Save locally first
+    // Simpan di local storage
     addStoredHistory(historyPayload);
 
-    // Sync to backend API
+    // Sinkronkan ke API / Supabase
     try {
       await historyService.createHistory(historyPayload);
     } catch (err) {
-      console.warn('Backend sync failed, saved locally in LocalStorage:', err);
+      console.warn('Simpan riwayat lokal berhasil:', err);
     } finally {
       setSavingHistory(false);
       setSavedSuccess(true);
@@ -125,7 +153,7 @@ export const CookingModePage = () => {
     );
   }
 
-  // --- SCREEN 2: COOKING COMPLETED CELEBRATION ---
+  // --- TAMPILAN SELESAI MEMASAK ---
   if (completed) {
     return (
       <div style={{
@@ -159,10 +187,10 @@ export const CookingModePage = () => {
             Selamat, Masakan Selesai!
           </h1>
           <p style={{ fontSize: '14.5px', color: 'var(--text-muted)', marginBottom: '24px' }}>
-            Kamu berhasil memasak <strong style={{ color: 'var(--primary)' }}>{recipe.name}</strong> dengan panduan suara QuickPrep.
+            Kamu berhasil memasak <strong style={{ color: 'var(--primary)' }}>{recipe.name}</strong> dengan panduan langkah demi langkah QuickPrep.
           </p>
 
-          {/* Rating Stars */}
+          {/* Rating Bintang */}
           <div style={{ marginBottom: '20px' }}>
             <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
               Bagaimana hasil masakanmu?
@@ -174,7 +202,10 @@ export const CookingModePage = () => {
                   onClick={() => setRating(star)}
                   style={{
                     color: star <= rating ? '#F59E0B' : '#D1D5DB',
-                    transition: 'transform 0.1s'
+                    transition: 'transform 0.1s',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer'
                   }}
                 >
                   <Star size={28} fill={star <= rating ? 'currentColor' : 'none'} />
@@ -183,7 +214,7 @@ export const CookingModePage = () => {
             </div>
           </div>
 
-          {/* Notes input */}
+          {/* Catatan Pengalaman */}
           <div style={{ marginBottom: '24px', textAlign: 'left' }}>
             <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
               Catatan Rasa / Pengalaman Memasak (Opsional):
@@ -191,14 +222,14 @@ export const CookingModePage = () => {
             <textarea
               className="input-field"
               rows={2}
-              placeholder="Contoh: Enak banget, tadi ditambah cabai rawit ekstra makin mantap!"
+              placeholder="Contoh: Enak banget, rasanya pas dan matangnya merata!"
               value={cookingNotes}
               onChange={(e) => setCookingNotes(e.target.value)}
               style={{ resize: 'none' }}
             />
           </div>
 
-          {/* Action buttons */}
+          {/* Tombol Simpan Riwayat */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {!savedSuccess ? (
               <button
@@ -241,8 +272,9 @@ export const CookingModePage = () => {
     );
   }
 
-  // --- SCREEN 1: ACTIVE STEP-BY-STEP VOICE COOKING MODE ---
+  // --- TAMPILAN MODE MEMASAK LANGKAH DEMI LANGKAH ---
   const currentDuration = currentStep?.duration_minutes || 2;
+  const hasSubstitutions = Object.keys(appliedSubstitutions).length > 0;
 
   return (
     <div style={{
@@ -252,7 +284,7 @@ export const CookingModePage = () => {
       flexDirection: 'column',
       gap: '20px'
     }}>
-      {/* Top Header Navigation */}
+      {/* Header Mode Memasak */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -260,33 +292,55 @@ export const CookingModePage = () => {
         padding: '12px 0'
       }}>
         <button
-          onClick={() => {
-            stop();
-            navigate(`/recipe/${recipe.id}`);
-          }}
+          onClick={() => navigate(`/recipe/${recipe.id}`)}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             fontSize: '13px',
             fontWeight: '600',
-            color: 'var(--text-muted)'
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
           }}
         >
           <X size={18} />
           <span>Keluar Mode Masak</span>
         </button>
 
-        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--primary)' }}>
-          Langkah {currentStepIndex + 1} dari {totalSteps}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ChefHat size={18} color="var(--primary)" />
+          <div style={{ fontSize: '13.5px', fontWeight: '800', color: 'var(--text-main)' }}>
+            Langkah {currentStepIndex + 1} dari {totalSteps}
+          </div>
         </div>
       </div>
 
-      {/* Progress Bar of Steps */}
+      {/* Indikator Bahan Pengganti Diterapkan */}
+      {hasSubstitutions && (
+        <div style={{
+          padding: '10px 14px',
+          background: 'var(--primary-light)',
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '12.5px',
+          fontWeight: '700',
+          color: 'var(--primary)',
+          border: '1px solid rgba(224, 98, 58, 0.2)'
+        }}>
+          <RefreshCw size={14} />
+          <span>Bahan Pengganti Aktif: Langkah memasak telah disesuaikan otomatis dengan bahan pengganti pilihan Anda.</span>
+        </div>
+      )}
+
+      {/* Progress Bar Langkah */}
       <div style={{
         width: '100%',
         height: '6px',
-        backgroundColor: '#EAE3D9',
+        backgroundColor: 'var(--bg-secondary)',
         borderRadius: '999px',
         overflow: 'hidden'
       }}>
@@ -298,13 +352,13 @@ export const CookingModePage = () => {
         }} />
       </div>
 
-      {/* Main Step Instruction Card */}
+      {/* Card Instruksi Langkah Utama */}
       <div className="card" style={{
         padding: '24px',
         background: 'var(--bg-card-warm)',
         border: '1.5px solid var(--border-subtle)'
       }}>
-        {/* Step Badge & Duration */}
+        {/* Step Badge & Tombol Timer */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -335,7 +389,8 @@ export const CookingModePage = () => {
               background: 'var(--sage-light)',
               padding: '6px 12px',
               borderRadius: '999px',
-              border: '1px solid #C8E6C9'
+              border: '1px solid #C8E6C9',
+              cursor: 'pointer'
             }}
           >
             <Timer size={15} />
@@ -343,22 +398,42 @@ export const CookingModePage = () => {
           </button>
         </div>
 
-        {/* Step Title */}
+        {/* Judul Langkah */}
         <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '14px' }}>
           {currentStep?.title}
         </h2>
 
-        {/* Big Step Instruction Text for Easy Reading */}
+        {/* Teks Instruksi Langkah yang Jelas & Nyaman Dibaca */}
         <p style={{
-          fontSize: '17px',
-          lineHeight: 1.6,
-          color: '#372B25',
-          marginBottom: '20px'
+          fontSize: '18px',
+          lineHeight: 1.65,
+          color: 'var(--text-main)',
+          marginBottom: '20px',
+          fontWeight: '500'
         }}>
           {currentStep?.instruction}
         </p>
 
-        {/* Step Tips */}
+        {/* Penanda jika langkah ini menggunakan bahan pengganti */}
+        {currentStep?.isModifiedBySubstitution && (
+          <div style={{
+            marginBottom: '18px',
+            fontSize: '12px',
+            color: 'var(--primary)',
+            background: 'var(--primary-light)',
+            padding: '6px 12px',
+            borderRadius: 'var(--radius-sm)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontWeight: '700'
+          }}>
+            <RefreshCw size={13} />
+            <span>Langkah disesuaikan ({currentStep.substitutionChanges?.map(c => `${c.substitute} menggantikan ${c.original}`).join(', ')})</span>
+          </div>
+        )}
+
+        {/* Tips Langkah */}
         {currentStep?.tips && (
           <div style={{
             padding: '12px 16px',
@@ -374,104 +449,18 @@ export const CookingModePage = () => {
           </div>
         )}
 
-        {/* Embedded Step Cooking Timer if toggled */}
+        {/* Timer Memasak Terintegrasi */}
         {showStepTimer && (
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '10px' }}>
             <CookingTimer 
               initialMinutes={currentDuration} 
               label={`Timer Langkah ${currentStepIndex + 1}: ${currentStep?.title}`} 
             />
           </div>
         )}
-
-        {/* Voice Audio Controls Bar */}
-        <div style={{
-          padding: '16px',
-          background: 'var(--bg-secondary)',
-          borderRadius: 'var(--radius-lg)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Volume2 size={18} color="var(--primary)" />
-              <span style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-main)' }}>
-                Panduan Suara QuickPrep (Bahasa Indonesia)
-              </span>
-            </div>
-
-            {/* Speed Control Pill */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Kecepatan:</span>
-              <select
-                value={speed}
-                onChange={(e) => changeSpeed(Number(e.target.value))}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: '700',
-                  padding: '3px 8px',
-                  borderRadius: '999px',
-                  border: '1px solid var(--border-subtle)',
-                  background: 'var(--bg-card)',
-                  color: 'var(--text-main)',
-                  outline: 'none'
-                }}
-              >
-                <option value={0.75}>0.75x</option>
-                <option value={1.0}>1x Normal</option>
-                <option value={1.25}>1.25x</option>
-                <option value={1.5}>1.5x</option>
-                <option value={2.0}>2x Cepat</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Voice Action Buttons: Play, Pause, Resume, Replay */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {!isSpeaking && !isPaused ? (
-              <button
-                onClick={readCurrentInstruction}
-                className="btn-primary"
-                style={{ flex: 1, padding: '10px 16px', fontSize: '13.5px' }}
-              >
-                <Play size={16} fill="currentColor" />
-                <span>Bacakan Instruksi Ini</span>
-              </button>
-            ) : isSpeaking ? (
-              <button
-                onClick={pause}
-                className="btn-primary"
-                style={{ flex: 1, padding: '10px 16px', fontSize: '13.5px', background: '#D97706' }}
-              >
-                <Pause size={16} />
-                <span>Jeda Suara (Pause)</span>
-              </button>
-            ) : (
-              <button
-                onClick={resume}
-                className="btn-primary"
-                style={{ flex: 1, padding: '10px 16px', fontSize: '13.5px' }}
-              >
-                <Play size={16} fill="currentColor" />
-                <span>Lanjutkan Suara (Resume)</span>
-              </button>
-            )}
-
-            <button
-              onClick={readCurrentInstruction}
-              className="btn-secondary"
-              style={{ padding: '10px 16px', fontSize: '13.5px' }}
-              title="Ulangi Instruksi Langkah Ini"
-            >
-              <RotateCcw size={15} />
-              <span>Ulangi Suara</span>
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Step Navigation Bar: Prev & Next Step */}
+      {/* Bar Navigasi Langkah: Sebelum & Lanjut */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -483,8 +472,13 @@ export const CookingModePage = () => {
           disabled={currentStepIndex === 0}
           className="btn-secondary"
           style={{
-            padding: '12px 20px',
-            fontSize: '14px',
+            flex: 1,
+            padding: '14px 20px',
+            fontSize: '14.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
             opacity: currentStepIndex === 0 ? 0.4 : 1,
             cursor: currentStepIndex === 0 ? 'not-allowed' : 'pointer'
           }}
@@ -497,12 +491,16 @@ export const CookingModePage = () => {
           onClick={handleNextStep}
           className="btn-primary"
           style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            background: currentStepIndex === totalSteps - 1 ? 'var(--sage)' : 'var(--primary)'
+            flex: 1.2,
+            padding: '14px 20px',
+            fontSize: '14.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
           }}
         >
-          <span>{currentStepIndex === totalSteps - 1 ? 'Selesai Memasak' : 'Langkah Selanjutnya'}</span>
+          <span>{currentStepIndex === totalSteps - 1 ? 'Selesaikan Masakan 🎉' : 'Langkah Selanjutnya'}</span>
           <ChevronRight size={18} />
         </button>
       </div>

@@ -4,7 +4,6 @@ import {
   Settings, 
   Wrench, 
   Wallet, 
-  Volume2, 
   History, 
   Check, 
   Disc3, 
@@ -324,25 +323,6 @@ export const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Voice Speed Preference */}
-        <div style={{ marginBottom: '24px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <Volume2 size={16} color="var(--primary)" />
-            <span style={{ fontSize: '14px', fontWeight: '700' }}>Kecepatan Suara Panduan Memasak:</span>
-          </div>
-          <select
-            value={profile.voiceSpeed}
-            onChange={(e) => setProfile(prev => ({ ...prev, voiceSpeed: Number(e.target.value) }))}
-            className="input-field"
-            style={{ maxWidth: '240px' }}
-          >
-            <option value={0.75}>0.75x (Lambat)</option>
-            <option value={1.0}>1.0x (Normal)</option>
-            <option value={1.25}>1.25x (Sedang)</option>
-            <option value={1.5}>1.5x (Cepat)</option>
-          </select>
-        </div>
-
         {/* Night Mode Preference */}
         <div style={{ marginBottom: '24px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
@@ -406,7 +386,7 @@ export const ProfilePage = () => {
 
         {history.length === 0 ? (
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>
-            Belum ada masakan yang dicatat. Selesaikan langkah memasak di Mode Panduan Suara untuk mencatat riwayat pertama Anda.
+            Belum ada masakan yang dicatat. Selesaikan langkah memasak di Mode Memasak untuk mencatat riwayat pertama Anda.
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -498,7 +478,7 @@ export const ProfilePage = () => {
             <strong>QuickPrep</strong> dirancang sebagai panduan memasak praktis untuk mahasiswa dan pemula dalam menentukan hidangan harian berdasarkan ketersediaan bahan, alat memasak, dan batas pengeluaran.
           </p>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-            Aplikasi ini mengintegrasikan pencarian resep sesuai budget, filter alat yang dimiliki, pemilihan menu acak melalui roda putar (Recipe Spin), rekomendasi substitusi bumbu saat bahan tertentu tidak tersedia, dan panduan langkah memasak bersuara (Voice Guided Cooking).
+            Aplikasi ini mengintegrasikan pencarian resep sesuai budget, filter alat yang dimiliki, pemilihan menu acak melalui roda putar (Recipe Spin), rekomendasi substitusi bumbu saat bahan tertentu tidak tersedia, dan panduan memasak interaktif langkah demi langkah dengan timer.
           </p>
         </div>
 
@@ -548,10 +528,10 @@ export const ProfilePage = () => {
 
             <div style={{ padding: '14px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--sage)', marginBottom: '4px' }}>
-                5. Voice Guided Cooking
+                5. Mode Memasak & Timer Terintegrasi
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Panduan memasak bersuara alami Bahasa Indonesia per langkah, kontrol kecepatan suara, dan timer terintegrasi.
+                Panduan memasak interaktif langkah demi langkah, checklist bahan, penyesuaian bahan otomatis, dan timer memasak terintegrasi.
               </div>
             </div>
 

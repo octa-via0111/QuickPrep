@@ -14,7 +14,7 @@ QuickPrep tidak hanya menyediakan daftar resep biasa, melainkan secara aktif mem
 - Alat masak apa saja yang tersedia di kosan (fitur **Cook with My Tools**).
 - Memilihkan menu secara otomatis ketika bingung mau makan apa (fitur **Recipe Spin Wheel**).
 - Memberikan solusi alternatif bumbu ketika ada bahan yang habis di kulkas (fitur **Missing Ingredients / Substitusi Bahan**).
-- Membimbing langkah demi langkah memasak tanpa perlu terus-menerus memegang layar HP melalui suara natural Bahasa Indonesia (fitur **Voice Guided Cooking**).
+- Membimbing langkah demi langkah memasak dengan fokus penuh, teks instruksi besar, penyesuaian bahan pengganti otomatis, dan timer memasak terintegrasi (fitur **Mode Memasak Interaktif**).
 
 ---
 
@@ -35,11 +35,11 @@ QuickPrep tidak hanya menyediakan daftar resep biasa, melainkan secara aktif mem
    - Mengganti bahan langsung di tampilan resep secara interaktif.
 5. **Dynamic Serving Scaler (Pengatur Porsi Dinamis)**:
    - Jumlah porsi resep dapat diubah naik/turun dengan satu klik, dan kuantitas seluruh takaran bahan otomatis dikalkulasikan ulang.
-6. **Voice Guided Cooking (Panduan Memasak Melalui Suara)**:
+6. **Mode Memasak Interaktif (Step-by-Step Cooking Mode)**:
    - Mode memasak layar fokus per langkah (*distraction-free*).
-   - Narasi suara berbahasa Indonesia yang natural menggunakan Web Speech API.
-   - Kontrol pemutaran: *Play*, *Pause*, *Resume*, *Replay*, *Previous Step*, *Next Step*, serta pengaturan kecepatan suara (0.75x, 1x, 1.25x, 1.5x, 2x).
-   - Suara **tidak** otomatis berpindah ke langkah berikutnya sebelum pengguna siap.
+   - Penyesuaian otomatis nama bahan pada instruksi jika pengguna memilih bahan pengganti/substitusi.
+   - Navigasi jelas: *Langkah Sebelumnya*, *Langkah Berikutnya*, serta indikator progres langkah.
+   - Selesai memasak ditandai selebrasi confetti dan pencatatan riwayat memasak.
 7. **Cooking Timer Terintegrasi**:
    - Timer hitung mundur interaktif per langkah atau mandiri dengan preset durasi dan notifikasi suara lonceng (*chime*) saat waktu habis.
 8. **Resep Favorit & Riwayat Memasak**:
@@ -142,7 +142,7 @@ TA QUICKPREP/
 │   │   │   └── useSpeech.js         # Web Speech API TTS Bahasa Indonesia
 │   │   ├── pages/
 │   │   │   ├── BudgetPage.jsx       # Halaman Cook on Budget
-│   │   │   ├── CookingModePage.jsx  # Halaman Voice Guided Cooking
+│   │   │   ├── CookingModePage.jsx  # Halaman Mode Memasak Interaktif
 │   │   │   ├── ExplorePage.jsx      # Halaman Jelajah Resep & Filter
 │   │   │   ├── FavoritesPage.jsx    # Halaman Resep Favorit
 │   │   │   ├── HomePage.jsx         # Halaman Utama
@@ -412,7 +412,7 @@ Langkah pengujian:
 | **Recipe Spin Wheel** | Ya | Ya (kandidat dari cache) | Tetap dapat memutar roulette dan memilih resep yang tersimpan di perangkat. |
 | **Checklist Bahan & Porsi** | Tidak | **Ya 100%** | Dikelola secara interaktif di sisi klien (React state). |
 | **Substitusi Bahan** | Ya | Ya (dari cache) | Database substitusi yang sudah dicache dapat langsung dilihat. |
-| **Voice Guided Cooking** | Tidak | **Ya 100%** | Menggunakan Web Speech API bawaan perangkat/browser pengguna. |
+| **Mode Memasak Interaktif** | Tidak | **Ya 100%** | Panduan memasak per langkah dengan instruksi dinamis & penyesuaian substitusi. |
 | **Cooking Timer** | Tidak | **Ya 100%** | Menggunakan Web Audio API dan JavaScript interval di browser. |
 | **Simpan Favorit & Profil** | Tidak | **Ya 100%** | Tersimpan langsung di LocalStorage perangkat. |
 | **Simpan Riwayat Masak** | Tidak | **Ya 100%** | Tersimpan di LocalStorage secara instan dan akan disinkronisasikan ke backend API saat online. |
@@ -431,13 +431,12 @@ Langkah pengujian:
 - [x] **Kartu resep** dapat diklik dan membuka detail resep.
 - [x] **Detail resep** menampilkan foto, deskripsi, estimasi biaya, alat, bahan, dan langkah.
 - [x] **Checklist bahan** berfungsi dengan status coret/tersedia.
-- [x] **Substitusi bahan** dapat dipilih dengan penjelasan rasa dan tekstur.
+- [x] **Substitusi bahan** dapat dipilih dengan penjelasan rasa dan tekstur serta **otomatis memperbarui teks langkah memasak**.
 - [x] **Pengatur porsi dinamis** (Scaler) otomatis menghitung ulang jumlah bahan.
-- [x] **Voice Guided Cooking** memandu langkah memasak dengan audio Bahasa Indonesia natural.
-- [x] **Kontrol audio**: Play, Pause, Resume, Replay, Prev Step, Next Step, Speed (0.75x - 2x).
+- [x] **Mode Memasak Interaktif** memandu langkah memasak dengan antarmuka fokus dan navigasi jelas.
 - [x] **Timer memasak** menghitung mundur dan berbunyi notifikasi lonceng saat selesai.
 - [x] **Favorit** dapat ditambah/dihapus dan tersimpan di LocalStorage.
-- [x] **Profil & Preferensi** alat masak dan kecepatan suara dapat diedit dan tersimpan.
+- [x] **Profil & Preferensi** alat masak dan tema night mode dapat diedit dan tersimpan.
 - [x] **Riwayat memasak** tersimpan dengan rating dan catatan.
 - [x] **RESTful API** terstruktur (Router, Controller, Service, Middleware) dan siap uji Postman.
 - [x] **Database Supabase** PostgreSQL didukung penuh (`schema.sql` dan `seed.sql`).

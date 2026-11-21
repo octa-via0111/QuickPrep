@@ -6,7 +6,6 @@ import {
   Heart, 
   Users, 
   ChevronLeft, 
-  Volume2, 
   CheckSquare, 
   Square, 
   RefreshCw, 
@@ -17,7 +16,8 @@ import {
   AlertCircle,
   Play,
   Globe,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import { useFavorites } from '../hooks/useFavorites.js';
@@ -71,6 +71,58 @@ export const RecipeDetailPage = () => {
       };
     });
   }, [recipe, scaleFactor, appliedSubstitutions]);
+
+  // Langkah memasak otomatis menyesuaikan bahan pengganti yang dipilih pengguna
+  const adjustedInstructions = useMemo(() => {
+    const rawSteps = recipe?.instructions || [];
+    if (!appliedSubstitutions || Object.keys(appliedSubstitutions).length === 0) {
+      return rawSteps;
+    }
+
+    const subList = [];
+    Object.entries(appliedSubstitutions).forEach(([idx, subName]) => {
+      const orig = ingredientsList[idx]?.originalName || ingredientsList[idx]?.name;
+      if (orig && subName) {
+        subList.push({ original: orig.trim(), substitute: subName.trim() });
+      }
+    });
+
+    if (subList.length === 0) return rawSteps;
+
+    return rawSteps.map(step => {
+      let text = step.instruction || '';
+      let isChanged = false;
+      const changes = [];
+
+      subList.forEach(({ original, substitute }) => {
+        const escaped = original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const reg = new RegExp(`\\b${escaped}\\b`, 'gi');
+        if (reg.test(text)) {
+          isChanged = true;
+          changes.push({ original, substitute });
+          text = text.replace(reg, substitute);
+        } else {
+          const parts = original.split(' ');
+          if (parts.length > 1 && parts[0].length >= 4) {
+            const partEsc = parts[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const partReg = new RegExp(`\\b${partEsc}\\b`, 'gi');
+            if (partReg.test(text)) {
+              isChanged = true;
+              changes.push({ original, substitute });
+              text = text.replace(partReg, substitute);
+            }
+          }
+        }
+      });
+
+      return {
+        ...step,
+        instruction: text,
+        isModifiedBySubstitution: isChanged,
+        substitutionChanges: changes
+      };
+    });
+  }, [recipe, appliedSubstitutions, ingredientsList]);
 
   const toggleCheckIngredient = (index) => {
     setCheckedIngredients(prev => ({
@@ -276,11 +328,12 @@ export const RecipeDetailPage = () => {
       }}>
         <Link
           to={`/cook/${recipe.id}`}
+          state={{ appliedSubstitutions }}
           className="btn-primary"
-          style={{ flex: 1, padding: '14px 24px', fontSize: '15px', minWidth: '220px' }}
+          style={{ flex: 1, padding: '14px 24px', fontSize: '15px', minWidth: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
-          <Volume2 size={20} />
-          <span>Masak dengan Panduan Suara</span>
+          <ChefHat size={20} />
+          <span>Mulai Masak Langkah demi Langkah</span>
         </Link>
       </div>
 
@@ -517,7 +570,7 @@ export const RecipeDetailPage = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {(recipe.instructions || []).map((step, idx) => (
+          {adjustedInstructions.map((step, idx) => (
             <div
               key={idx}
               style={{
@@ -526,7 +579,7 @@ export const RecipeDetailPage = () => {
                 padding: '16px',
                 background: 'var(--bg-card-warm)',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-subtle)'
+                border: step.isModifiedBySubstitution ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)'
               }}
             >
               {/* Step Number Circle */}
@@ -534,8 +587,8 @@ export const RecipeDetailPage = () => {
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                background: 'var(--primary-light)',
-                color: 'var(--primary)',
+                background: step.isModifiedBySubstitution ? 'var(--primary)' : 'var(--primary-light)',
+                color: step.isModifiedBySubstitution ? '#FFFFFF' : 'var(--primary)',
                 fontWeight: '800',
                 fontSize: '14px',
                 display: 'flex',
@@ -559,9 +612,28 @@ export const RecipeDetailPage = () => {
                   )}
                 </div>
 
-                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-main)', lineHeight: 1.55 }}>
                   {step.instruction}
                 </p>
+
+                {/* Penanda jika langkah ini memakai bahan pengganti */}
+                {step.isModifiedBySubstitution && (
+                  <div style={{
+                    marginTop: '8px',
+                    fontSize: '11.5px',
+                    color: 'var(--primary)',
+                    background: 'var(--primary-light)',
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: '700'
+                  }}>
+                    <RefreshCw size={12} />
+                    <span>Langkah disesuaikan ({step.substitutionChanges?.map(c => `${c.substitute} menggantikan ${c.original}`).join(', ')})</span>
+                  </div>
+                )}
 
                 {step.tips && (
                   <div style={{
@@ -605,8 +677,9 @@ export const RecipeDetailPage = () => {
 
         <Link
           to={`/cook/${recipe.id}`}
+          state={{ appliedSubstitutions }}
           className="btn-primary"
-          style={{ padding: '10px 20px', fontSize: '13.5px' }}
+          style={{ padding: '10px 20px', fontSize: '13.5px', display: 'flex', alignItems: 'center', gap: '6px' }}
         >
           <Play size={16} fill="currentColor" />
           <span>Mulai Masak</span>
