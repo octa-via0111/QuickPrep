@@ -74,29 +74,7 @@ export const PWAInstallBanner = () => {
 
   return (
     <>
-      <div 
-        className="pwa-install-banner"
-        style={{
-          position: 'fixed',
-          bottom: '76px', // Tepat di atas mobile bottom nav (64px + 12px)
-          left: '14px',
-          right: '14px',
-          zIndex: 95,
-          background: 'var(--bg-card, #1D122E)',
-          color: 'var(--text-main, #FFFFFF)',
-          borderRadius: '18px',
-          padding: '14px 16px',
-          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.45)',
-          border: '1px solid var(--border-subtle, rgba(255, 255, 255, 0.12))',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          animation: 'fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-      >
+      <div className="pwa-install-banner">
         {/* Sisi Kiri: Ikon & Teks Info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
           <div style={{
