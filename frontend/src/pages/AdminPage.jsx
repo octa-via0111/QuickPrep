@@ -131,7 +131,7 @@ export const AdminPage = () => {
     setLoginError('');
 
     if (!loginUsername.trim() || !loginPassword.trim()) {
-      setLoginError('Username dan kata sandi admin wajib diisi!');
+      setLoginError('Username dan kata sandi wajib diisi!');
       return;
     }
 
@@ -143,10 +143,10 @@ export const AdminPage = () => {
         setAdminUser(res.data?.user || { username: loginUsername.trim(), role: 'Administrator' });
         showAlert('success', 'Selamat datang! Anda berhasil masuk sebagai Administrator.');
       } else {
-        setLoginError(res?.message || 'Username atau kata sandi admin salah!');
+        setLoginError('Akses ditolak! Kredensial tidak valid. Hanya administrator yang dapat masuk.');
       }
     } catch (err) {
-      setLoginError(err.message || 'Gagal masuk. Periksa kembali username dan kata sandi.');
+      setLoginError('Akses ditolak! Anda bukan administrator atau kredensial yang dimasukkan salah.');
     } finally {
       setLoginLoading(false);
     }
@@ -530,9 +530,10 @@ export const AdminPage = () => {
                     type="text"
                     value={loginUsername}
                     onChange={(e) => setLoginUsername(e.target.value)}
-                    placeholder="Masukkan username admin"
+                    placeholder="Masukkan username"
                     className="input-field"
                     required
+                    autoComplete="off"
                     style={{ paddingLeft: '38px', height: '44px', fontSize: '14px' }}
                   />
                 </div>
@@ -548,9 +549,10 @@ export const AdminPage = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="Masukkan kata sandi admin"
+                    placeholder="Masukkan kata sandi"
                     className="input-field"
                     required
+                    autoComplete="current-password"
                     style={{ paddingLeft: '38px', paddingRight: '40px', height: '44px', fontSize: '14px' }}
                   />
                   <button
@@ -574,41 +576,6 @@ export const AdminPage = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-              </div>
-
-              {/* Quick Fill Default Credential Helper */}
-              <div style={{
-                background: 'var(--bg-secondary)',
-                border: '1px dashed var(--border-subtle)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '10px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '12px'
-              }}>
-                <span style={{ color: 'var(--text-muted)' }}>
-                  Default: <strong>admin</strong> / <strong>admin123</strong>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginUsername('admin');
-                    setLoginPassword('admin123');
-                  }}
-                  style={{
-                    background: 'var(--purple-dark)',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '4px 10px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Gunakan Default
-                </button>
               </div>
 
               <button

@@ -35,7 +35,7 @@ router.post('/login', (req, res) => {
 
     return res.status(401).json({
       success: false,
-      message: 'Username atau kata sandi admin salah! Akses ditolak.'
+      message: 'Akses ditolak! Anda bukan administrator atau kredensial yang dimasukkan salah.'
     });
   } catch (error) {
     return res.status(500).json({
