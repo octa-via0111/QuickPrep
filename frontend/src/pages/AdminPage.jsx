@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Search, 
-  Edit3, 
-  Trash2, 
-  Image as ImageIcon, 
-  Clock, 
-  Wallet, 
-  X, 
-  Check, 
-  AlertCircle, 
-  ChefHat, 
+import {
+  Plus,
+  Search,
+  Edit3,
+  Trash2,
+  Image as ImageIcon,
+  Clock,
+  Wallet,
+  X,
+  Check,
+  AlertCircle,
+  ChefHat,
   FolderOpen,
   UtensilsCrossed,
   Home,
@@ -183,7 +183,7 @@ export const AdminPage = () => {
   // Open modal for Editing Existing Recipe
   const handleOpenEditModal = (recipe) => {
     setEditingRecipe(recipe);
-    
+
     let parsedInstructions = recipe.instructions;
     if (typeof parsedInstructions === 'string') {
       try {
@@ -317,13 +317,13 @@ export const AdminPage = () => {
       if (activeTab === 'popular' && !r.is_popular) return false;
 
       // Recipe search filter
-      const matchSearch = recipeSearch.trim() === '' || 
+      const matchSearch = recipeSearch.trim() === '' ||
         r.name.toLowerCase().includes(recipeSearch.toLowerCase()) ||
         (r.description && r.description.toLowerCase().includes(recipeSearch.toLowerCase()));
-      
+
       // Category dropdown filter
-      const matchCategory = selectedCategory === 'semua' || 
-        r.category_id === selectedCategory || 
+      const matchCategory = selectedCategory === 'semua' ||
+        r.category_id === selectedCategory ||
         r.category?.id === selectedCategory;
 
       return matchSearch && matchCategory;
@@ -490,7 +490,7 @@ export const AdminPage = () => {
 
               <button
                 type="button"
-                onClick={() => openLogin('admin')}
+                onClick={() => openLogin()}
                 style={{
                   width: '100%',
                   height: '44px',
@@ -887,10 +887,10 @@ export const AdminPage = () => {
 
           {/* Search Box di Atas Sidebar */}
           <div style={{ position: 'relative', width: '100%' }}>
-            <Search 
-              size={15} 
-              color="rgba(255, 255, 255, 0.45)" 
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} 
+            <Search
+              size={15}
+              color="rgba(255, 255, 255, 0.45)"
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
             />
             <input
               type="text"
@@ -915,7 +915,7 @@ export const AdminPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginTop: '4px' }}>
             {sidebarSections.map((sec, sIdx) => {
               // Filter items based on sidebar search input
-              const visibleItems = sec.items.filter(item => 
+              const visibleItems = sec.items.filter(item =>
                 sidebarSearch.trim() === '' || item.label.toLowerCase().includes(sidebarSearch.toLowerCase())
               );
 
@@ -1047,8 +1047,8 @@ export const AdminPage = () => {
                     {activeTab === 'kos' ? 'Kategori Khusus' : activeTab === 'popular' ? 'Favorit Pengguna' : 'Kelola Resep'}
                   </div>
                   <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#FFF' }}>
-                    {activeTab === 'kos' ? 'Resep Masakan Anak Kos' : 
-                     activeTab === 'popular' ? 'Resep Masakan Populer' : 'Daftar Seluruh Menu Masakan'}
+                    {activeTab === 'kos' ? 'Resep Masakan Anak Kos' :
+                      activeTab === 'popular' ? 'Resep Masakan Populer' : 'Daftar Seluruh Menu Masakan'}
                   </h1>
                   <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.85)', marginTop: '2px' }}>
                     Menampilkan {filteredRecipes.length} resep masakan aktif di aplikasi QuickPrep.

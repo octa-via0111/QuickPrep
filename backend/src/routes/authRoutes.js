@@ -3,81 +3,62 @@ import { Router } from 'express';
 const router = Router();
 
 // ==========================================
-// 1. ENDPOINT LOGIN ADMINISTRATOR
+// 1. ENDPOINT LOGIN TERSATU (UNIFIED LOGIN)
+// Otomatis mendeteksi Admin atau Pengguna
 // ==========================================
-router.post('/login', handleAdminLogin);
-router.post('/admin/login', handleAdminLogin);
+router.post('/login', handleUnifiedLogin);
+router.post('/admin/login', handleUnifiedLogin);
+router.post('/user/login', handleUnifiedLogin);
+router.post('/user/register', handleUnifiedLogin);
 
-function handleAdminLogin(req, res) {
+function handleUnifiedLogin(req, res) {
   try {
-    const { username, password } = req.body;
+    const { name, email, username, password } = req.body;
+    const identifier = (username || email || '').trim();
 
-    const validUsername = process.env.ADMIN_USERNAME || 'admin';
-    const validPassword = process.env.ADMIN_PASSWORD || 'admin123';
-
-    if (!username || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Username dan kata sandi admin wajib diisi!'
+        message: 'Email / Username dan kata sandi wajib diisi!'
       });
     }
 
-    if (username.trim() === validUsername && password === validPassword) {
-      // Buat token sesi admin
-      const token = `quickprep_token_${Buffer.from(username + ':' + Date.now()).toString('base64')}`;
+    const validAdminUser = process.env.ADMIN_USERNAME || 'admin';
+    const validAdminPass = process.env.ADMIN_PASSWORD || 'admin123';
 
-      return res.status(200).json({
-        success: true,
-        message: 'Login berhasil! Selamat datang Admin QuickPrep.',
-        data: {
-          username: validUsername,
-          name: 'Administrator',
-          role: 'admin',
-          token,
-          expiresIn: '24h'
-        }
-      });
+    // 1. Cek jika identifier adalah Administrator
+    if (identifier.toLowerCase() === validAdminUser.toLowerCase()) {
+      if (password === validAdminPass) {
+        const token = `quickprep_token_${Buffer.from(validAdminUser + ':' + Date.now()).toString('base64')}`;
+        return res.status(200).json({
+          success: true,
+          message: 'Login berhasil! Selamat datang Administrator.',
+          data: {
+            username: validAdminUser,
+            name: 'Administrator',
+            role: 'admin',
+            token,
+            expiresIn: '24h'
+          }
+        });
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: 'Kata sandi admin salah! Akses administrator ditolak.'
+        });
+      }
     }
 
-    return res.status(401).json({
-      success: false,
-      message: 'Akses ditolak! Anda bukan administrator atau kredensial yang dimasukkan salah.'
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Terjadi kesalahan pada server saat verifikasi autentikasi admin.'
-    });
-  }
-}
-
-// ==========================================
-// 2. ENDPOINT LOGIN & DAFTAR PENGGUNA (USER)
-// ==========================================
-router.post('/user/login', handleUserLogin);
-router.post('/user/register', handleUserLogin);
-
-function handleUserLogin(req, res) {
-  try {
-    const { name, email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email dan kata sandi pengguna wajib diisi!'
-      });
-    }
-
-    // Format nama pengguna
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = (name && name.trim()) ? name.trim() : cleanEmail.split('@')[0];
-
-    // Buat token pengguna reguler
+    // 2. Jika bukan admin, proses sebagai Pengguna Biasa (User)
+    const cleanEmail = identifier;
+    const cleanName = (name && name.trim()) 
+      ? name.trim() 
+      : (cleanEmail.includes('@') ? cleanEmail.split('@')[0] : cleanEmail);
     const userToken = `user_token_${Buffer.from(cleanEmail + ':' + Date.now()).toString('base64')}`;
 
     return res.status(200).json({
       success: true,
-      message: `Selamat datang, ${cleanName}! Login pengguna berhasil.`,
+      message: `Selamat datang, ${cleanName}! Login berhasil.`,
       data: {
         name: cleanName,
         email: cleanEmail,
@@ -89,13 +70,13 @@ function handleUserLogin(req, res) {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Terjadi kesalahan pada server saat autentikasi pengguna.'
+      message: 'Terjadi kesalahan pada server saat verifikasi login.'
     });
   }
 }
 
 // ==========================================
-// 3. ENDPOINT VERIFIKASI TOKEN
+// 2. ENDPOINT VERIFIKASI TOKEN
 // ==========================================
 router.get('/verify', (req, res) => {
   const authHeader = req.headers.authorization;

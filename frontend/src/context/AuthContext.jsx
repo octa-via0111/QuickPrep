@@ -6,7 +6,6 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => authService.getUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState('user'); // 'user' | 'admin'
 
   useEffect(() => {
     const handleAuthChange = () => {
@@ -22,8 +21,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const openLogin = (tab = 'user') => {
-    setAuthModalTab(tab);
+  const openLogin = () => {
     setIsAuthModalOpen(true);
   };
 
@@ -31,18 +29,19 @@ export const AuthProvider = ({ children }) => {
     setIsAuthModalOpen(false);
   };
 
-  const loginAsAdmin = async (username, password) => {
-    const res = await authService.loginAdmin(username, password);
+  const login = async (data) => {
+    const res = await authService.unifiedLogin(data);
     setCurrentUser(authService.getUser());
     closeLogin();
     return res;
   };
 
+  const loginAsAdmin = async (username, password) => {
+    return login({ identifier: username, password });
+  };
+
   const loginAsUser = async (data) => {
-    const res = await authService.loginUser(data);
-    setCurrentUser(authService.getUser());
-    closeLogin();
-    return res;
+    return login({ name: data.name, identifier: data.email, password: data.password });
   };
 
   const logout = () => {
@@ -56,10 +55,9 @@ export const AuthProvider = ({ children }) => {
     isAdmin: currentUser?.role === 'admin',
     isUser: currentUser?.role === 'user',
     isAuthModalOpen,
-    authModalTab,
-    setAuthModalTab,
     openLogin,
     closeLogin,
+    login,
     loginAsAdmin,
     loginAsUser,
     logout

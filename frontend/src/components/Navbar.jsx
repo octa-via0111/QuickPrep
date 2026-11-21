@@ -151,7 +151,7 @@ export const Navbar = () => {
           {/* 1. Belum Login: Tampilkan Tombol Masuk */}
           {!currentUser ? (
             <button
-              onClick={() => openLogin('user')}
+              onClick={() => openLogin()}
               title="Masuk ke Akun"
               style={{
                 padding: '8px 16px',
