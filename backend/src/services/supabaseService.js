@@ -273,7 +273,7 @@ export const recipeService = {
       name: recipeData.name,
       slug,
       description: recipeData.description || '',
-      image_url: recipeData.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+      image_url: normalizeImageUrl(recipeData.image_url) || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
       category_id: recipeData.category_id || 'anak-kos',
       cooking_time: Number(recipeData.cooking_time) || 15,
       preparation_time: Number(recipeData.preparation_time) || 5,
@@ -319,7 +319,7 @@ export const recipeService = {
     if (recipeData.name !== undefined) updates.name = recipeData.name;
     if (recipeData.slug !== undefined) updates.slug = recipeData.slug;
     if (recipeData.description !== undefined) updates.description = recipeData.description;
-    if (recipeData.image_url !== undefined) updates.image_url = recipeData.image_url;
+    if (recipeData.image_url !== undefined) updates.image_url = normalizeImageUrl(recipeData.image_url);
     if (recipeData.category_id !== undefined) updates.category_id = recipeData.category_id;
     if (recipeData.cooking_time !== undefined) updates.cooking_time = Number(recipeData.cooking_time);
     if (recipeData.preparation_time !== undefined) updates.preparation_time = Number(recipeData.preparation_time);

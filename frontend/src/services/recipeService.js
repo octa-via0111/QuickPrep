@@ -36,6 +36,13 @@ export const recipeService = {
   },
 
   /**
+   * Upload foto resep (Admin)
+   */
+  async uploadRecipeImage({ filename, base64Data }) {
+    return api.post('/recipes/upload-image', { filename, base64Data });
+  },
+
+  /**
    * Update resep yang ada (Admin)
    */
   async updateRecipe(id, recipeData) {

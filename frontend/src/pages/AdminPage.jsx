@@ -36,7 +36,7 @@ import recipeService from '../services/recipeService.js';
 import toolService from '../services/toolService.js';
 import substitutionService from '../services/substitutionService.js';
 import useCategories from '../hooks/useCategories.js';
-import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter.js';
+import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 
 export const AdminPage = () => {
   const navigate = useNavigate();
@@ -48,6 +48,7 @@ export const AdminPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Data States
   const [recipes, setRecipes] = useState([]);
@@ -217,20 +218,46 @@ export const AdminPage = () => {
     setIsModalOpen(true);
   };
 
-  // Handle local file selection from File Manager
-  const handleFileChange = (e) => {
+  // Handle file selection from File Manager dengan upload nyata ke server & Supabase
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const cleanFileName = file.name.replace(/\s+/g, '-').toLowerCase();
-    const localPath = `/recipes/${cleanFileName}`;
+    // Tampilkan pratinjau lokal sementara
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
 
-    setFormData(prev => ({
-      ...prev,
-      image_url: localPath
-    }));
+    try {
+      setUploadingImage(true);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result;
+          const res = await recipeService.uploadRecipeImage({
+            filename: file.name,
+            base64Data
+          });
+          const uploadedUrl = res?.data?.data?.imageUrl || res?.data?.imageUrl;
+          if (uploadedUrl) {
+            setFormData(prev => ({
+              ...prev,
+              image_url: uploadedUrl
+            }));
+            setImagePreview(uploadedUrl);
+            showAlert('success', 'Foto masakan berhasil diunggah ke server!');
+          }
+        } catch (uploadErr) {
+          console.error('Upload foto error:', uploadErr);
+          showAlert('error', 'Gagal mengunggah foto ke server. Silakan coba lagi.');
+        } finally {
+          setUploadingImage(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setUploadingImage(false);
+      showAlert('error', 'Gagal memproses file foto.');
+    }
   };
 
   // Step instructions handlers
@@ -366,40 +393,8 @@ export const AdminPage = () => {
       ]
     },
     {
-      title: 'DATA MASTER',
+      title: 'NAVIGASI',
       items: [
-        {
-          id: 'categories',
-          label: 'Kategori Masakan',
-          icon: FolderOpen,
-          iconBg: '#7C3AED',
-          badge: categories.length
-        },
-        {
-          id: 'tools',
-          label: 'Alat Masak Kos',
-          icon: Wrench,
-          iconBg: '#2563EB',
-          badge: toolsList.length
-        },
-        {
-          id: 'substitutions',
-          label: 'Substitusi Bahan',
-          icon: RefreshCw,
-          iconBg: '#0D9488',
-          badge: substitutionsList.length
-        }
-      ]
-    },
-    {
-      title: 'SISTEM',
-      items: [
-        {
-          id: 'system',
-          label: 'Status Database',
-          icon: Database,
-          iconBg: '#059669'
-        },
         {
           id: 'logout',
           label: 'Keluar (Logout)',
@@ -1247,159 +1242,6 @@ export const AdminPage = () => {
               )}
             </>
           )}
-
-          {/* TAB 2: DATA KATEGORI */}
-          {activeTab === 'categories' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
-                  Data Master Kategori Masakan
-                </h2>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Daftar seluruh kelompok hidangan yang digunakan untuk klasifikasi menu.
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
-                {categories.map((cat) => {
-                  const countInCat = recipes.filter(r => r.category_id === cat.id || r.category?.id === cat.id).length;
-                  return (
-                    <div key={cat.id} className="card" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>{cat.name}</span>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          background: 'var(--purple-light)',
-                          color: 'var(--purple-main)',
-                          padding: '2px 8px',
-                          borderRadius: '999px'
-                        }}>
-                          {countInCat} Resep
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>{cat.description}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: DATA ALAT MASAK */}
-          {activeTab === 'tools' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
-                  Data Peralatan Masak
-                </h2>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Peralatan yang digunakan pada fitur "Cook with My Tools".
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
-                {toolsList.map((tool) => (
-                  <div key={tool.id} className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '10px',
-                      background: 'var(--primary-light)',
-                      color: 'var(--primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Wrench size={20} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>{tool.name}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '1px' }}>ID: <code>{tool.id}</code></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: DATA SUBSTITUSI BAHAN */}
-          {activeTab === 'substitutions' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
-                  Data Substitusi Bahan (Missing Ingredients)
-                </h2>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Rekomendasi alternatif bumbu ketika bahan tertentu habis di kosan.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {substitutionsList.map((sub) => (
-                  <div key={sub.id} className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>
-                        {sub.original_ingredient}
-                      </span>
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>digantikan oleh</span>
-                      <span style={{
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: 'var(--primary)',
-                        background: 'var(--primary-light)',
-                        padding: '2px 8px',
-                        borderRadius: '999px'
-                      }}>
-                        {sub.substitute_ingredient}
-                      </span>
-                      <span style={{ fontSize: '12px', color: 'var(--sage)', fontWeight: '600' }}>
-                        (Rasio: {sub.ratio})
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                      <strong>Catatan Rasa:</strong> {sub.notes}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: SISTEM & DATABASE STATUS */}
-          {activeTab === 'system' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Database size={22} color="var(--primary)" />
-                  <span>Status Sistem & Database Supabase</span>
-                </h2>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Informasi konektivitas REST API Express dan Supabase PostgreSQL.
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                    <CheckCircle2 size={18} color="var(--success-green)" />
-                    <span><strong>Database Supabase:</strong> Terhubung Aktif (8 Tabel Relasional)</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                    <CheckCircle2 size={18} color="var(--success-green)" />
-                    <span><strong>Project Ref:</strong> <code>dnhlngwxepicvugxbeee</code></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                    <CheckCircle2 size={18} color="var(--success-green)" />
-                    <span><strong>CRUD Endpoints:</strong> POST, PUT, DELETE /api/recipes Siap Pakai</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                    <CheckCircle2 size={18} color="var(--success-green)" />
-                    <span><strong>PWA Offline Cache:</strong> Service Worker Siap Cache File Lokal <code>/recipes/</code></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </main>
       </div>
 
@@ -1499,7 +1341,7 @@ export const AdminPage = () => {
                     <ImageIcon size={16} /> Foto Masakan
                   </label>
                   <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                    Bisa pakai file lokal di <code>/recipes/...</code> atau link URL
+                    Bisa unggah file atau masukkan link URL foto
                   </span>
                 </div>
 
@@ -1508,11 +1350,12 @@ export const AdminPage = () => {
                   <input
                     type="text"
                     className="input-field"
-                    placeholder="Contoh: /recipes/nasi-goreng.jpg atau link URL https://..."
+                    placeholder="Contoh: link URL https://... atau /recipes/..."
                     value={formData.image_url}
                     onChange={(e) => {
-                      setFormData({ ...formData, image_url: e.target.value });
-                      setImagePreview(e.target.value);
+                      const cleanVal = formatImageUrl(e.target.value.trim());
+                      setFormData({ ...formData, image_url: cleanVal });
+                      setImagePreview(cleanVal);
                     }}
                   />
                 </div>
@@ -1523,26 +1366,28 @@ export const AdminPage = () => {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    background: 'var(--purple-dark)',
+                    background: uploadingImage ? 'var(--text-muted)' : 'var(--purple-dark)',
                     color: '#FFFFFF',
                     padding: '8px 14px',
                     borderRadius: 'var(--radius-sm)',
                     fontSize: '12.5px',
                     fontWeight: '700',
-                    cursor: 'pointer'
+                    cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                    boxShadow: 'var(--shadow-purple)'
                   }}>
                     <FolderOpen size={15} />
-                    <span>Pilih Foto dari File Manager</span>
+                    <span>{uploadingImage ? 'Mengunggah Foto ke Server...' : 'Pilih Foto dari File Manager'}</span>
                     <input
                       type="file"
                       accept="image/*"
+                      disabled={uploadingImage}
                       style={{ display: 'none' }}
                       onChange={handleFileChange}
                     />
                   </label>
 
                   <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                    File tersimpan di folder: <code>frontend/public/recipes/</code>
+                    {uploadingImage ? 'Sedang memproses upload...' : 'Foto langsung diunggah ke server & tersimpan di database'}
                   </div>
                 </div>
 
