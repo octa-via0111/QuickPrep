@@ -23,11 +23,19 @@ function handleUnifiedLogin(req, res) {
       });
     }
 
-    const validAdminUser = process.env.ADMIN_USERNAME || 'admin';
+    const validAdminUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
     const validAdminPass = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminAliases = [
+      validAdminUser,
+      'admin@gmail.com',
+      'admin@quickprep.com',
+      'admin@admin.com',
+      (process.env.ADMIN_EMAIL || '').toLowerCase()
+    ].filter(Boolean);
 
-    // 1. Cek jika identifier adalah Administrator
-    if (identifier.toLowerCase() === validAdminUser.toLowerCase()) {
+    // 1. Cek jika identifier adalah Administrator (username atau email admin)
+    const isTryingAdmin = adminAliases.includes(identifier.toLowerCase());
+    if (isTryingAdmin) {
       if (password === validAdminPass) {
         const token = `quickprep_token_${Buffer.from(validAdminUser + ':' + Date.now()).toString('base64')}`;
         return res.status(200).json({
