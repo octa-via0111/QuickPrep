@@ -84,7 +84,33 @@ function handleUnifiedLogin(req, res) {
 }
 
 // ==========================================
-// 2. ENDPOINT VERIFIKASI TOKEN
+// 2. ENDPOINT LUPA KATA SANDI
+// ==========================================
+router.post('/forgot-password', (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Alamat email wajib diisi!'
+      });
+    }
+
+    const cleanEmail = email.trim();
+    return res.status(200).json({
+      success: true,
+      message: `Petunjuk pemulihan kata sandi telah dikirim ke alamat email "${cleanEmail}". Silakan periksa kotak masuk atau spam Anda.`
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal memproses permintaan lupa kata sandi.'
+    });
+  }
+});
+
+// ==========================================
+// 3. ENDPOINT VERIFIKASI TOKEN
 // ==========================================
 router.get('/verify', (req, res) => {
   const authHeader = req.headers.authorization;

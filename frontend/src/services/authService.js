@@ -26,14 +26,15 @@ export const authService = {
         sessionStorage.removeItem(ADMIN_TOKEN_KEY);
       }
 
-      // Sinkronkan nama ke profil lokal jika user
-      if (userData.name) {
+      // Sinkronkan nama dan email ke profil lokal jika user
+      if (userData.name || userData.email) {
         try {
           const rawProfile = localStorage.getItem('quickprep_profile');
           const existingProfile = rawProfile ? JSON.parse(rawProfile) : {};
           localStorage.setItem('quickprep_profile', JSON.stringify({
             ...existingProfile,
-            name: userData.name
+            name: userData.name || existingProfile.name,
+            email: userData.email || existingProfile.email || ''
           }));
         } catch (e) {}
       }
@@ -42,6 +43,20 @@ export const authService = {
     }
 
     return response;
+  },
+
+  // Permintaan Lupa Kata Sandi
+  forgotPassword: async (email) => {
+    return api.post('/auth/forgot-password', { email });
+  },
+
+  // Update data user aktif
+  updateCurrentUser: (updatedUser) => {
+    try {
+      sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(updatedUser));
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event('auth-change'));
+    } catch (e) {}
   },
 
   // Helper kompatibilitas
@@ -88,6 +103,7 @@ export const authService = {
     sessionStorage.removeItem(AUTH_USER_KEY);
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem('quickprep_profile');
     window.dispatchEvent(new Event('auth-change'));
   }
 };

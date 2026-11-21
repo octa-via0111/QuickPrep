@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { 
   User, 
   Settings, 
@@ -19,7 +18,9 @@ import {
   Layers,
   ChefHat,
   CheckSquare,
-  Square
+  Square,
+  Mail,
+  BadgeCheck
 } from 'lucide-react';
 import { 
   getStoredProfile, 
@@ -42,16 +43,23 @@ const AVATAR_THEMES = [
 ];
 
 export const ProfilePage = () => {
-  const { currentUser, isAdmin } = useAuth();
+  const { currentUser, isAdmin, updateUser } = useAuth();
   const [profile, setProfile] = useState(() => getStoredProfile());
   const [history, setHistory] = useState(() => getStoredHistory());
   const [toolsList, setToolsList] = useState([]);
   const [savedAlert, setSavedAlert] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
 
+  // Otomatis sinkronkan data profil dengan akun yang sedang login
   useEffect(() => {
-    if (currentUser?.name) {
-      setProfile(prev => ({ ...prev, name: currentUser.name }));
+    if (currentUser) {
+      setProfile(prev => ({
+        ...prev,
+        name: currentUser.name || prev.name || '',
+        email: currentUser.email || prev.email || ''
+      }));
+    } else {
+      setProfile(getStoredProfile());
     }
   }, [currentUser]);
 
@@ -80,6 +88,12 @@ export const ProfilePage = () => {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     saveStoredProfile(profile);
+    if (currentUser && updateUser) {
+      updateUser({
+        name: profile.name,
+        email: profile.email || currentUser.email
+      });
+    }
     setSavedAlert(true);
     setTimeout(() => setSavedAlert(false), 3000);
   };
@@ -91,7 +105,7 @@ export const ProfilePage = () => {
     }
   };
 
-  const userInitial = (profile.name || 'U').trim().charAt(0).toUpperCase();
+  const userInitial = (profile.name || currentUser?.name || 'U').trim().charAt(0).toUpperCase();
   const userColor = profile.avatarColor || '#E0623A';
 
   return (
@@ -104,47 +118,6 @@ export const ProfilePage = () => {
         <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           Kelola profil pengguna, preferensi alat memasak, riwayat masakan, serta informasi lengkap aplikasi QuickPrep.
         </p>
-      </div>
-
-      {/* Admin Panel Quick Shortcut */}
-      <div className="card" style={{
-        padding: '18px 22px',
-        background: 'var(--purple-dark)',
-        color: '#FFFFFF',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        boxShadow: 'var(--shadow-purple)'
-      }}>
-        <div>
-          <div style={{ fontSize: '15.5px', fontWeight: '800', color: '#FFF' }}>
-            Panel Admin Resep Masakan
-          </div>
-          <div style={{ fontSize: '12.5px', color: 'rgba(255, 255, 255, 0.85)', marginTop: '2px' }}>
-            Tambah resep baru, ubah foto makanan dari file manager, dan edit data resep.
-          </div>
-        </div>
-
-        <Link
-          to="/admin"
-          style={{
-            background: 'var(--primary)',
-            color: '#FFFFFF',
-            padding: '9px 18px',
-            borderRadius: '999px',
-            fontSize: '13px',
-            fontWeight: '700',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            boxShadow: 'var(--shadow-warm)'
-          }}
-        >
-          <Settings size={15} />
-          <span>Buka Panel Admin</span>
-        </Link>
       </div>
 
       {savedAlert && (
@@ -166,10 +139,34 @@ export const ProfilePage = () => {
 
       {/* 2. User Profile Form */}
       <form onSubmit={handleSaveProfile} className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <User size={18} color="var(--primary)" />
-          <span>Identitas Pengguna</span>
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <User size={18} color="var(--primary)" />
+            <span>Identitas Pengguna</span>
+          </h2>
+
+          {currentUser ? (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 12px',
+              borderRadius: '999px',
+              background: isAdmin ? 'var(--purple-dark)' : 'var(--sage-light)',
+              color: isAdmin ? '#FFFFFF' : 'var(--sage-dark)',
+              fontSize: '12px',
+              fontWeight: '700',
+              border: isAdmin ? 'none' : '1px solid rgba(78, 124, 93, 0.25)'
+            }}>
+              {isAdmin ? <ShieldCheck size={14} color="var(--primary)" /> : <BadgeCheck size={14} color="var(--sage)" />}
+              <span>{isAdmin ? 'Peran: Administrator' : 'Akun Terdaftar'}</span>
+            </div>
+          ) : (
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>
+              Mode Tamu (Belum Masuk)
+            </span>
+          )}
+        </div>
 
         {/* Profile Avatar Preview & Color Themes */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '22px' }}>
@@ -222,14 +219,41 @@ export const ProfilePage = () => {
           <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
             Nama Pengguna:
           </label>
-          <input
-            type="text"
-            className="input-field"
-            value={profile.name}
-            onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Nama Anda"
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <User size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              className="input-field"
+              value={profile.name}
+              onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Nama Anda"
+              required
+              style={{ paddingLeft: '36px' }}
+            />
+          </div>
+        </div>
+
+        {/* Email input (Otomatis dari Akun) */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+            Alamat Email Akun:
+          </label>
+          <div style={{ position: 'relative' }}>
+            <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="email"
+              className="input-field"
+              value={profile.email || currentUser?.email || ''}
+              onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
+              placeholder={currentUser ? currentUser.email : "Belum masuk akun (masuk untuk menyimpan email)"}
+              style={{ paddingLeft: '36px' }}
+            />
+          </div>
+          {currentUser?.email && (
+            <p style={{ fontSize: '11.5px', color: 'var(--sage)', margin: '4px 0 0 0', fontWeight: '600' }}>
+              ✓ Otomatis terhubung dengan akun {currentUser.email}
+            </p>
+          )}
         </div>
 
         {/* Default Budget */}

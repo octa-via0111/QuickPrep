@@ -618,7 +618,7 @@ export const AdminPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleLogin} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: 'var(--purple-dark)' }}>
                   Username
@@ -651,7 +651,7 @@ export const AdminPage = () => {
                     placeholder="Masukkan kata sandi"
                     className="input-field"
                     required
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     style={{ paddingLeft: '38px', paddingRight: '40px', height: '44px', fontSize: '14px' }}
                   />
                   <button
@@ -674,6 +674,11 @@ export const AdminPage = () => {
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                    Lupa sandi admin? Periksa file keamanan (.env) server
+                  </span>
                 </div>
               </div>
 

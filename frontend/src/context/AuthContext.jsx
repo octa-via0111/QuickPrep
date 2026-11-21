@@ -49,6 +49,12 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  const updateUser = (updatedData) => {
+    const merged = { ...currentUser, ...updatedData };
+    authService.updateCurrentUser(merged);
+    setCurrentUser(merged);
+  };
+
   const value = {
     currentUser,
     isAuthenticated: Boolean(currentUser),
@@ -60,7 +66,8 @@ export const AuthProvider = ({ children }) => {
     login,
     loginAsAdmin,
     loginAsUser,
-    logout
+    logout,
+    updateUser
   };
 
   return (
