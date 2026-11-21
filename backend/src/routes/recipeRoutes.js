@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { 
-  getAllRecipes, 
-  getRecipeById, 
+import {
+  getAllRecipes,
+  getRecipeById,
   getRecipeSubstitutions,
   createRecipe,
   updateRecipe,

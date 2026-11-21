@@ -780,26 +780,6 @@ export const AdminPage = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={handleOpenAddModal}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 18px',
-              borderRadius: 'var(--radius-full)',
-              background: 'var(--primary)',
-              color: '#FFFFFF',
-              fontSize: '13px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-warm)'
-            }}
-          >
-            <Plus size={16} />
-            <span>Tambah Resep</span>
-          </button>
-
-          <button
             onClick={() => {
               if (window.confirm('Apakah Anda yakin ingin keluar dari sesi Admin?')) {
                 handleLogout();
@@ -810,7 +790,7 @@ export const AdminPage = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '10px 14px',
+              padding: '10px 16px',
               borderRadius: 'var(--radius-full)',
               background: 'var(--bg-secondary)',
               color: 'var(--alert-red)',
