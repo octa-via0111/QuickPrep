@@ -5,10 +5,31 @@ import { recipes as seedRecipes, categories as seedCategories, tools as seedTool
 let memoryHistory = [];
 
 /**
+ * Normalizes Supabase dashboard URLs into public CDN URLs if needed
+ */
+function normalizeImageUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  
+  const dashboardRegex = /supabase\.com\/dashboard\/project\/([^\/]+)\/storage\/files\/buckets\/([^\/?#]+).*?[?&]preview=([^&]+)/i;
+  const match = url.match(dashboardRegex);
+  if (match) {
+    const projectRef = match[1];
+    const bucket = match[2];
+    const fileName = decodeURIComponent(match[3]);
+    return `https://${projectRef}.supabase.co/storage/v1/object/public/${bucket}/${encodeURIComponent(fileName)}`;
+  }
+  
+  return url;
+}
+
+/**
  * Normalizes a recipe from raw data or DB to full structure
  */
 function enrichRecipe(recipe) {
   if (!recipe) return null;
+  
+  // Normalize image URL
+  const cleanImageUrl = normalizeImageUrl(recipe.image_url);
   
   // Find category details
   const cat = seedCategories.find(c => c.id === recipe.category_id);
@@ -43,6 +64,7 @@ function enrichRecipe(recipe) {
 
   return {
     ...recipe,
+    image_url: cleanImageUrl,
     category: cat || { id: recipe.category_id, name: recipe.category_id },
     tools: recipeTools,
     substitutions: relevantSubstitutions

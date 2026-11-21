@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Heart, Users, ChefHat } from 'lucide-react';
-import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter.js';
+import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 
 export const RecipeCard = ({ recipe }) => {
@@ -36,7 +36,7 @@ export const RecipeCard = ({ recipe }) => {
         overflow: 'hidden'
       }}>
         <img
-          src={recipe.image_url}
+          src={formatImageUrl(recipe.image_url)}
           alt={recipe.name}
           loading="lazy"
           style={{

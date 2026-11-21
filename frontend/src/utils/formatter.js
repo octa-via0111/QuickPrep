@@ -37,3 +37,24 @@ export const getDifficultyColor = (difficulty) => {
       return { bg: '#F3F4F6', text: '#4B5563', border: '#E5E7EB' };
   }
 };
+
+/**
+ * Format image URL: auto-converts Supabase dashboard preview links to direct public CDN image URLs
+ */
+export const formatImageUrl = (url) => {
+  if (!url || typeof url !== 'string') {
+    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+  }
+
+  const dashboardRegex = /supabase\.com\/dashboard\/project\/([^\/]+)\/storage\/files\/buckets\/([^\/?#]+).*?[?&]preview=([^&]+)/i;
+  const match = url.match(dashboardRegex);
+  if (match) {
+    const projectRef = match[1];
+    const bucket = match[2];
+    const fileName = decodeURIComponent(match[3]);
+    return `https://${projectRef}.supabase.co/storage/v1/object/public/${bucket}/${encodeURIComponent(fileName)}`;
+  }
+
+  return url;
+};
+

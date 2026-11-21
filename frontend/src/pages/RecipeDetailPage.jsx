@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import { useFavorites } from '../hooks/useFavorites.js';
-import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter.js';
+import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import SubstitutionModal from '../components/SubstitutionModal.jsx';
 
 export const RecipeDetailPage = () => {
@@ -162,7 +162,7 @@ export const RecipeDetailPage = () => {
           backgroundColor: '#F0ECE4'
         }}>
           <img
-            src={recipe.image_url}
+            src={formatImageUrl(recipe.image_url)}
             alt={recipe.name}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => {
