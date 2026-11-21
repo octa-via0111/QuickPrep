@@ -4,6 +4,8 @@
   --bg-card: #FFFFFF;
   --bg-card-warm: #FCF9F6;
   --bg-secondary: #F3ECE5;
+  --bg-header: rgba(255, 253, 249, 0.94);
+  --bg-bottom-nav: rgba(255, 253, 250, 0.97);
   
   /* Solid Warna Utama 1: Terracotta (Oranye Hangat) */
   --primary: #E0623A;
@@ -56,6 +58,62 @@
   --radius-full: 9999px;
 
   --nav-height: 64px;
+}
+
+/* QuickPrep Night Mode / Dark Theme */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-main: #13091F;
+  --bg-card: #1D122E;
+  --bg-card-warm: #231638;
+  --bg-secondary: #2B1B44;
+  --bg-header: rgba(26, 15, 42, 0.94);
+  --bg-bottom-nav: rgba(26, 15, 42, 0.97);
+
+  /* Primary Accent: Terracotta Vibrant for Dark Mode */
+  --primary: #E56A44;
+  --primary-hover: #F07954;
+  --primary-light: #3D1C12;
+  --primary-dark: #A33B18;
+
+  /* Ungu Gelap */
+  --purple-dark: #120622;
+  --purple-main: #2D144A;
+  --purple-hover: #3A1B5E;
+  --purple-light: #2D1748;
+  --purple-border: #4D2678;
+
+  /* Sage */
+  --sage: #5EA174;
+  --sage-light: #163220;
+  --sage-dark: #375B43;
+
+  /* Amber */
+  --amber: #F59E0B;
+  --amber-light: #3E2908;
+  --warning-amber: #F59E0B;
+  --warning-amber-light: #3E2908;
+
+  /* Status Colors */
+  --alert-red: #F87171;
+  --alert-red-light: #41171A;
+  --success-green: #34D399;
+  --success-green-light: #133924;
+
+  /* Typography */
+  --text-main: #F3EFF9;
+  --text-muted: #B3A4C7;
+  --text-light: #837299;
+
+  --border-subtle: #352253;
+  --border-focus: #E56A44;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.65);
+  --shadow-warm: 0 8px 24px rgba(229, 106, 68, 0.22);
+  --shadow-purple: 0 8px 24px rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -423,4 +481,18 @@ button {
     width: 100%;
     position: static;
   }
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #3B2456;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #523377;
+}
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #1D122E 25%, #2B1A44 50%, #1D122E 75%);
+  background-size: 200% 100%;
+}
+[data-theme="dark"] .modal-overlay {
+  background: rgba(10, 4, 18, 0.75);
 }

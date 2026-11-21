@@ -20,7 +20,9 @@ import {
   CheckSquare,
   Square,
   Mail,
-  BadgeCheck
+  BadgeCheck,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { 
   getStoredProfile, 
@@ -32,6 +34,7 @@ import { formatRupiah } from '../utils/formatter.js';
 import toolService from '../services/toolService.js';
 import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 const AVATAR_THEMES = [
   { color: '#260F3D', label: 'Ungu Gelap' },
@@ -44,6 +47,7 @@ const AVATAR_THEMES = [
 
 export const ProfilePage = () => {
   const { currentUser, isAdmin, updateUser } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [profile, setProfile] = useState(() => getStoredProfile());
   const [history, setHistory] = useState(() => getStoredHistory());
   const [toolsList, setToolsList] = useState([]);
@@ -335,6 +339,43 @@ export const ProfilePage = () => {
             <option value={1.25}>1.25x (Sedang)</option>
             <option value={1.5}>1.5x (Cepat)</option>
           </select>
+        </div>
+
+        {/* Night Mode Preference */}
+        <div style={{ marginBottom: '24px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                {isDark ? <Moon size={16} color="#F59E0B" /> : <Sun size={16} color="var(--primary)" />}
+                <span style={{ fontSize: '14px', fontWeight: '700' }}>Mode Tampilan Malam (Night Mode)</span>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+                {isDark ? 'Mode malam aktif. Warna gelap yang nyaman dan tidak silau di ruangan redup.' : 'Aktifkan mode malam untuk kenyamanan mata saat memasak.'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleTheme}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                background: isDark ? 'var(--purple-dark)' : 'var(--bg-secondary)',
+                color: isDark ? '#F59E0B' : 'var(--purple-dark)',
+                border: '1px solid var(--border-subtle)',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              <span>{isDark ? 'Mode Terang' : 'Mode Malam'}</span>
+            </button>
+          </div>
         </div>
 
         <button type="submit" className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '15px' }}>

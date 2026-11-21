@@ -37,7 +37,7 @@ export const BottomNav = () => {
       left: 0,
       right: 0,
       height: '64px',
-      background: 'rgba(255, 253, 250, 0.97)',
+      background: 'var(--bg-bottom-nav)',
       backdropFilter: 'blur(14px)',
       borderTop: '1px solid var(--border-subtle)',
       display: 'flex',
@@ -45,7 +45,8 @@ export const BottomNav = () => {
       justifyContent: 'space-around',
       padding: '0 4px',
       zIndex: 90,
-      boxShadow: '0 -4px 20px rgba(38, 15, 61, 0.06)'
+      boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
+      transition: 'background-color 0.25s ease, border-color 0.25s ease'
     }}>
       {navItems.map((item) => {
         const IconComponent = item.icon;
@@ -91,7 +92,7 @@ export const BottomNav = () => {
                     boxShadow: '0 6px 18px rgba(38, 15, 61, 0.35)',
                     transform: isActive ? 'scale(1.08)' : 'scale(1)',
                     transition: 'all 0.25s ease',
-                    border: '3px solid #FFFDF9'
+                    border: '3px solid var(--bg-card)'
                   }}>
                     <IconComponent size={23} strokeWidth={2.2} />
                   </div>

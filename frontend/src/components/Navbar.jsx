@@ -8,18 +8,22 @@ import {
   User,
   LogIn,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon
 } from 'lucide-react';
 import useOnlineStatus from '../hooks/useOnlineStatus.js';
 import { subscribeToInstallPrompt, promptPWAInstall } from '../utils/pwa.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 export const Navbar = () => {
   const isOnline = useOnlineStatus();
   const location = useLocation();
   const { count: favoriteCount } = useFavorites();
   const { currentUser, isAdmin, isUser, openLogin, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   
   const [canInstall, setCanInstall] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -54,13 +58,14 @@ export const Navbar = () => {
 
   return (
     <header style={{
-      background: 'rgba(255, 253, 249, 0.94)',
+      background: 'var(--bg-header)',
       backdropFilter: 'blur(10px)',
       borderBottom: '1px solid var(--border-subtle)',
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      width: '100%'
+      width: '100%',
+      transition: 'background-color 0.25s ease, border-color 0.25s ease'
     }}>
       <div style={{
         maxWidth: '1120px',
@@ -146,8 +151,31 @@ export const Navbar = () => {
           })}
         </nav>
 
-        {/* Right Action: Menu Masuk / Profil User & PWA Install */}
+        {/* Right Action: Menu Masuk / Profil User & PWA Install & Theme Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Tombol Night Mode / Dark Theme */}
+          <button
+            onClick={toggleTheme}
+            title={isDark ? 'Ganti ke Mode Terang (Day Mode)' : 'Ganti ke Mode Malam (Night Mode)'}
+            aria-label="Toggle Night Mode"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'var(--bg-secondary)',
+              color: isDark ? '#F59E0B' : 'var(--purple-dark)',
+              border: '1px solid var(--border-subtle)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              flexShrink: 0
+            }}
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+
           {/* 1. Belum Login: Tampilkan Tombol Masuk */}
           {!currentUser ? (
             <button
