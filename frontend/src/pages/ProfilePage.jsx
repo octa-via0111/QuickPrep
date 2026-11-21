@@ -22,7 +22,9 @@ import {
   Mail,
   BadgeCheck,
   Sun,
-  Moon
+  Moon,
+  Camera,
+  UploadCloud
 } from 'lucide-react';
 import { 
   getStoredProfile, 
@@ -62,12 +64,85 @@ export const ProfilePage = () => {
       setProfile(prev => ({
         ...prev,
         name: currentUser.name || prev.name || '',
-        email: currentUser.email || prev.email || ''
+        email: currentUser.email || prev.email || '',
+        avatarUrl: currentUser.avatarUrl || prev.avatarUrl || ''
       }));
     } else {
       setProfile(getStoredProfile());
     }
   }, [currentUser]);
+
+  // Fungsi kompresi gambar agar ringan dan muat disimpan di penyimpanan lokal
+  const compressImage = (file, maxSize = 320) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(dataUrl);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Harap pilih file gambar (JPG, PNG, atau WebP).');
+      return;
+    }
+
+    try {
+      const compressedData = await compressImage(file, 320);
+      const updated = { ...profile, avatarUrl: compressedData };
+      setProfile(updated);
+      saveStoredProfile(updated);
+      if (currentUser && updateUser) {
+        updateUser({ avatarUrl: compressedData });
+      }
+      setSavedAlert(true);
+      setTimeout(() => setSavedAlert(false), 3000);
+    } catch (err) {
+      console.error('Error processing photo:', err);
+      alert('Gagal memproses foto profil.');
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    const updated = { ...profile, avatarUrl: '' };
+    setProfile(updated);
+    saveStoredProfile(updated);
+    if (currentUser && updateUser) {
+      updateUser({ avatarUrl: '' });
+    }
+    setSavedAlert(true);
+    setTimeout(() => setSavedAlert(false), 3000);
+  };
 
   useEffect(() => {
     toolService.getTools()
@@ -97,7 +172,8 @@ export const ProfilePage = () => {
     if (currentUser && updateUser) {
       updateUser({
         name: profile.name,
-        email: profile.email || currentUser.email
+        email: profile.email || currentUser.email,
+        avatarUrl: profile.avatarUrl || ''
       });
     }
     setSavedAlert(true);
@@ -218,28 +294,138 @@ export const ProfilePage = () => {
           )}
         </div>
 
-        {/* Profile Avatar Preview & Color Themes */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '22px' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: userColor,
-            color: '#FFFFFF',
-            fontSize: '26px',
-            fontWeight: '800',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
-            flexShrink: 0
-          }}>
-            {userInitial}
+        {/* Profile Avatar & Photo Upload Section */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          marginBottom: '24px',
+          paddingBottom: '20px',
+          borderBottom: '1px solid var(--border-subtle)',
+          flexWrap: 'wrap'
+        }}>
+          {/* Avatar Container with Camera Badge */}
+          <div style={{ position: 'relative', width: '82px', height: '82px', flexShrink: 0 }}>
+            <div style={{
+              width: '82px',
+              height: '82px',
+              borderRadius: '50%',
+              background: profile.avatarUrl ? 'transparent' : userColor,
+              color: '#FFFFFF',
+              fontSize: '32px',
+              fontWeight: '800',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.14)',
+              overflow: 'hidden',
+              border: '2.5px solid var(--primary)'
+            }}>
+              {profile.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt="Foto Profil"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                userInitial
+              )}
+            </div>
+
+            {/* Quick Camera Overlay Button */}
+            <label
+              htmlFor="avatar-file-input"
+              title="Unggah Foto Profil Baru"
+              style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-2px',
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                background: 'var(--primary)',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.25)',
+                cursor: 'pointer',
+                border: '2px solid var(--bg-card)',
+                transition: 'transform 0.15s ease'
+              }}
+            >
+              <Camera size={15} />
+            </label>
+
+            {/* Hidden File Input */}
+            <input
+              id="avatar-file-input"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              style={{ display: 'none' }}
+            />
           </div>
 
-          <div>
+          {/* Action Buttons & Info */}
+          <div style={{ flex: 1, minWidth: '220px' }}>
+            <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '3px' }}>
+              Foto Profil
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+              Pilih foto dari galeri HP atau file manager laptop untuk foto profil Anda.
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <label
+                htmlFor="avatar-file-input"
+                className="btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  fontSize: '12.5px',
+                  fontWeight: '700',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer'
+                }}
+              >
+                <UploadCloud size={15} color="var(--primary)" />
+                <span>Pilih Foto dari Galeri</span>
+              </label>
+
+              {profile.avatarUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '7px 12px',
+                    fontSize: '12.5px',
+                    fontWeight: '700',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--alert-red-light)',
+                    color: 'var(--alert-red)',
+                    border: '1px solid #FECACA',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Trash2 size={13} />
+                  <span>Hapus Foto</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Warna Tema Inisial (Tampil jika belum menggunakan foto) */}
+        {!profile.avatarUrl && (
+          <div style={{ marginBottom: '22px' }}>
             <label style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>
-              Warna Tema Identitas:
+              Warna Tema Inisial (Jika Belum Memakai Foto):
             </label>
             <div style={{ display: 'flex', gap: '10px' }}>
               {AVATAR_THEMES.map((theme) => (
@@ -262,7 +448,7 @@ export const ProfilePage = () => {
               ))}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Name input */}
         <div style={{ marginBottom: '16px' }}>

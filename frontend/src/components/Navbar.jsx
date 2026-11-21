@@ -17,6 +17,7 @@ import { subscribeToInstallPrompt, promptPWAInstall, isAppInstalled } from '../u
 import { useFavorites } from '../hooks/useFavorites.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
+import { getStoredProfile } from '../utils/storage.js';
 import InstallAppModal from './InstallAppModal.jsx';
 
 export const Navbar = () => {
@@ -31,6 +32,8 @@ export const Navbar = () => {
   const [isStandalone, setIsStandalone] = useState(() => isAppInstalled());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const userPhoto = currentUser?.avatarUrl || getStoredProfile()?.avatarUrl;
 
   useEffect(() => {
     const unsubscribe = subscribeToInstallPrompt((supported) => {
@@ -251,9 +254,15 @@ export const Navbar = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '11px',
-                      fontWeight: '800'
+                      fontWeight: '800',
+                      overflow: 'hidden',
+                      flexShrink: 0
                     }}>
-                      {(currentUser.name || 'U').charAt(0).toUpperCase()}
+                      {userPhoto ? (
+                        <img src={userPhoto} alt="Foto" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        (currentUser.name || 'U').charAt(0).toUpperCase()
+                      )}
                     </div>
                     <span>{currentUser.name ? (currentUser.name.length > 12 ? currentUser.name.substring(0, 10) + '...' : currentUser.name) : 'Pengguna'}</span>
                   </>
@@ -267,11 +276,12 @@ export const Navbar = () => {
                   position: 'absolute',
                   right: 0,
                   top: 'calc(100% + 8px)',
-                  background: '#FFFDF9',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-main)',
                   borderRadius: '16px',
                   border: '1px solid var(--border-subtle)',
-                  boxShadow: '0 10px 30px rgba(31, 14, 52, 0.18)',
-                  minWidth: '190px',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.28)',
+                  minWidth: '200px',
                   padding: '8px',
                   zIndex: 100,
                   display: 'flex',
@@ -281,15 +291,40 @@ export const Navbar = () => {
                 }}>
                   {/* Info Header */}
                   <div style={{
-                    padding: '8px 10px 8px',
+                    padding: '8px 10px',
                     borderBottom: '1px solid var(--border-subtle)',
-                    marginBottom: '4px'
+                    marginBottom: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
                   }}>
-                    <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--purple-dark)' }}>
-                      {currentUser.name || (isAdmin ? 'Administrator' : 'Pengguna')}
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'var(--primary)',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      fontWeight: '800',
+                      overflow: 'hidden',
+                      flexShrink: 0
+                    }}>
+                      {userPhoto ? (
+                        <img src={userPhoto} alt="Foto Profil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        (currentUser.name || 'U').charAt(0).toUpperCase()
+                      )}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {isAdmin ? 'Peran: Administrator' : (currentUser.email || 'Akun Pengguna')}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {currentUser.name || (isAdmin ? 'Administrator' : 'Pengguna')}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {isAdmin ? 'Peran: Administrator' : (currentUser.email || 'Akun Pengguna')}
+                      </div>
                     </div>
                   </div>
 
@@ -303,7 +338,7 @@ export const Navbar = () => {
                         borderRadius: '8px',
                         fontSize: '13px',
                         fontWeight: '600',
-                        color: 'var(--purple-dark)',
+                        color: 'var(--text-main)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
@@ -322,7 +357,7 @@ export const Navbar = () => {
                         borderRadius: '8px',
                         fontSize: '13px',
                         fontWeight: '600',
-                        color: 'var(--purple-dark)',
+                        color: 'var(--text-main)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',

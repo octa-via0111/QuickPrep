@@ -10,6 +10,7 @@ export const DEFAULT_PROFILE = {
   name: 'Anak Kos Hebat',
   email: '',
   avatarColor: '#E0623A',
+  avatarUrl: '',
   defaultBudget: 15000,
   ownedTools: ['rice-cooker', 'wajan', 'teflon', 'kompor'],
   voiceSpeed: 1.0,
