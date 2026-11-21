@@ -1,5 +1,5 @@
 // QuickPrep Service Worker
-const CACHE_NAME = 'quickprep-v1.1.0';
+const CACHE_NAME = 'quickprep-v1.2.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -12,7 +12,8 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png',
   '/icons/icon-maskable-512x512.png',
   '/icons/icon-192x192.svg',
-  '/icons/icon-512x512.svg'
+  '/icons/icon-512x512.svg',
+  '/icons/icon-maskable-512x512.svg'
 ];
 
 // Install Event: Pre-cache App Shell & Static Assets
