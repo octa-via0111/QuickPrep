@@ -8,6 +8,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import toolRoutes from './routes/toolRoutes.js';
 import substitutionRoutes from './routes/substitutionRoutes.js';
 import historyRoutes from './routes/historyRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Main API Endpoints
+app.use('/api/auth', authRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/tools', toolRoutes);

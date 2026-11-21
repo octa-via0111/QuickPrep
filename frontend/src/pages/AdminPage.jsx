@@ -22,8 +22,14 @@ import {
   ArrowLeft,
   Menu,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  Eye,
+  EyeOff,
+  LogOut,
+  LogIn
 } from 'lucide-react';
+import authService from '../services/authService.js';
 import recipeService from '../services/recipeService.js';
 import toolService from '../services/toolService.js';
 import substitutionService from '../services/substitutionService.js';
@@ -32,6 +38,15 @@ import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter
 
 export const AdminPage = () => {
   const navigate = useNavigate();
+
+  // Authentication States
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isAuthenticated());
+  const [adminUser, setAdminUser] = useState(() => authService.getUser());
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Data States
   const [recipes, setRecipes] = useState([]);
@@ -100,12 +115,51 @@ export const AdminPage = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
 
   const showAlert = (type, text) => {
     setAlertMsg({ type, text });
     setTimeout(() => setAlertMsg(null), 4000);
+  };
+
+  // Handle Admin Login Form Submission
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+
+    if (!loginUsername.trim() || !loginPassword.trim()) {
+      setLoginError('Username dan kata sandi admin wajib diisi!');
+      return;
+    }
+
+    try {
+      setLoginLoading(true);
+      const res = await authService.login(loginUsername.trim(), loginPassword);
+      if (res?.success) {
+        setIsAuthenticated(true);
+        setAdminUser(res.data?.user || { username: loginUsername.trim(), role: 'Administrator' });
+        showAlert('success', 'Selamat datang! Anda berhasil masuk sebagai Administrator.');
+      } else {
+        setLoginError(res?.message || 'Username atau kata sandi admin salah!');
+      }
+    } catch (err) {
+      setLoginError(err.message || 'Gagal masuk. Periksa kembali username dan kata sandi.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // Handle Admin Logout
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+    setAdminUser(null);
+    setLoginUsername('');
+    setLoginPassword('');
+    showAlert('success', 'Sesi admin berakhir. Anda telah keluar dengan aman.');
   };
 
   // Open modal for Adding New Recipe
@@ -354,6 +408,13 @@ export const AdminPage = () => {
           iconBg: '#059669'
         },
         {
+          id: 'logout',
+          label: 'Keluar (Logout)',
+          icon: LogOut,
+          iconBg: '#DC2626',
+          isAction: true
+        },
+        {
           id: 'back_home',
           label: 'Kembali ke Beranda',
           icon: ArrowLeft,
@@ -368,6 +429,10 @@ export const AdminPage = () => {
     setIsMobileSidebarOpen(false);
     if (item.id === 'add') {
       handleOpenAddModal();
+    } else if (item.id === 'logout') {
+      if (window.confirm('Apakah Anda yakin ingin keluar dari sesi Admin?')) {
+        handleLogout();
+      }
     } else if (item.id === 'back_home') {
       navigate('/');
     } else {
@@ -375,50 +440,324 @@ export const AdminPage = () => {
     }
   };
 
+  // Jika belum login, tampilkan Login Gate Administrator
+  if (!isAuthenticated) {
+    return (
+      <div style={{
+        minHeight: '75vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px'
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '430px',
+          background: 'var(--card-bg)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: 'var(--shadow-card)',
+          overflow: 'hidden'
+        }}>
+          {/* Header Banner - Solid Deep Purple */}
+          <div style={{
+            background: 'var(--purple-dark)',
+            padding: '28px 24px 22px',
+            textAlign: 'center',
+            color: '#FFFFFF'
+          }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '16px',
+              background: 'var(--primary)',
+              margin: '0 auto 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 18px rgba(224, 98, 58, 0.4)'
+            }}>
+              <Lock size={28} color="#FFFFFF" strokeWidth={2.2} />
+            </div>
+            <h2 style={{
+              fontSize: '20px',
+              fontWeight: '800',
+              margin: '0 0 6px',
+              letterSpacing: '-0.3px',
+              color: '#FFFFFF'
+            }}>
+              Masuk Panel Admin
+            </h2>
+            <p style={{
+              fontSize: '13px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              margin: 0,
+              lineHeight: 1.45
+            }}>
+              Area khusus pengelola. Masukkan username dan kata sandi untuk mengelola resep.
+            </p>
+          </div>
+
+          {/* Form Content */}
+          <div style={{ padding: '24px' }}>
+            {loginError && (
+              <div style={{
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--alert-red-light)',
+                color: 'var(--alert-red)',
+                border: '1px solid #FECACA',
+                fontSize: '13px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '18px'
+              }}>
+                <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: 'var(--purple-dark)' }}>
+                  Username
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <ShieldCheck size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    value={loginUsername}
+                    onChange={(e) => setLoginUsername(e.target.value)}
+                    placeholder="Masukkan username admin"
+                    className="input-field"
+                    required
+                    style={{ paddingLeft: '38px', height: '44px', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', marginBottom: '6px', color: 'var(--purple-dark)' }}>
+                  Kata Sandi
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Masukkan kata sandi admin"
+                    className="input-field"
+                    required
+                    style={{ paddingLeft: '38px', paddingRight: '40px', height: '44px', fontSize: '14px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      color: 'var(--text-muted)',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title={showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Fill Default Credential Helper */}
+              <div style={{
+                background: 'var(--bg-secondary)',
+                border: '1px dashed var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '12px'
+              }}>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  Default: <strong>admin</strong> / <strong>admin123</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginUsername('admin');
+                    setLoginPassword('admin123');
+                  }}
+                  style={{
+                    background: 'var(--purple-dark)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Gunakan Default
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                style={{
+                  width: '100%',
+                  height: '46px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--primary)',
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: loginLoading ? 'not-allowed' : 'pointer',
+                  opacity: loginLoading ? 0.75 : 1,
+                  boxShadow: 'var(--shadow-warm)',
+                  marginTop: '4px'
+                }}
+              >
+                {loginLoading ? (
+                  <span>Memverifikasi...</span>
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    <span>Masuk Sebagai Admin</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'transparent',
+                  color: 'var(--text-muted)',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                <ArrowLeft size={16} />
+                <span>Kembali ke Beranda</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Mobile Sidebar Toggle Button */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <button
-          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-          className="admin-sidebar-mobile-toggle"
-          style={{
+      {/* Mobile Sidebar Toggle Button & Action Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            className="admin-sidebar-mobile-toggle"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--purple-dark)',
+              color: '#FFFFFF',
+              fontSize: '13.5px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-purple)'
+            }}
+          >
+            <Menu size={18} />
+            <span>Menu Navigasi Admin</span>
+          </button>
+
+          <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '10px 18px',
+            padding: '7px 14px',
             borderRadius: 'var(--radius-full)',
             background: 'var(--purple-dark)',
             color: '#FFFFFF',
-            fontSize: '13.5px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-purple)'
-          }}
-        >
-          <Menu size={18} />
-          <span>Menu Navigasi Admin</span>
-        </button>
+            fontSize: '12.5px',
+            fontWeight: '700'
+          }}>
+            <ShieldCheck size={16} color="var(--primary)" />
+            <span>Admin: <strong>{adminUser?.username || 'admin'}</strong></span>
+          </div>
+        </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '10px 18px',
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--primary)',
-            color: '#FFFFFF',
-            fontSize: '13px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-warm)'
-          }}
-        >
-          <Plus size={16} />
-          <span>Tambah Resep</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={handleOpenAddModal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 18px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--primary)',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-warm)'
+            }}
+          >
+            <Plus size={16} />
+            <span>Tambah Resep</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (window.confirm('Apakah Anda yakin ingin keluar dari sesi Admin?')) {
+                handleLogout();
+              }
+            }}
+            title="Keluar dari Admin"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--alert-red)',
+              fontSize: '13px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            <LogOut size={15} />
+            <span>Keluar</span>
+          </button>
+        </div>
       </div>
 
       {/* Alert Notification */}

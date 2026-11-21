@@ -11,6 +11,18 @@ const api = axios.create({
   timeout: 10000
 });
 
+// Request interceptor to automatically attach admin bearer token if available
+api.interceptors.request.use(
+  (config) => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('quickprep_admin_token') : null;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor for consistent error extraction
 api.interceptors.response.use(
   (response) => response.data,
