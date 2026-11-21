@@ -5,6 +5,7 @@ import BottomNav from './components/BottomNav.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import PWAInstallBanner from './components/PWAInstallBanner.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 
@@ -54,6 +55,9 @@ function App() {
 
           {/* Mobile Bottom Navigation Bar (5 tabs) */}
           <BottomNav />
+
+          {/* Floating PWA Install Notification Banner */}
+          <PWAInstallBanner />
         </div>
       </AuthProvider>
     </ThemeProvider>

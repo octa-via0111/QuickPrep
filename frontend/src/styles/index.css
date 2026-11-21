@@ -580,5 +580,11 @@ button {
     bottom: 24px;
     right: 24px;
   }
+  .pwa-install-banner {
+    left: 24px !important;
+    right: auto !important;
+    bottom: 24px !important;
+    max-width: 480px !important;
+  }
 }
 
