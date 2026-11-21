@@ -15,7 +15,9 @@ import {
   Share2,
   Wrench,
   AlertCircle,
-  Play
+  Play,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import { useFavorites } from '../hooks/useFavorites.js';
@@ -302,6 +304,62 @@ export const RecipeDetailPage = () => {
           </div>
         )}
       </div>
+
+      {/* Tautan Website Sumber Resep Eksternal */}
+      {recipe.source_url && (
+        <section className="card" style={{
+          padding: '16px 20px',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              background: 'var(--primary-light)',
+              color: 'var(--primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Globe size={22} />
+            </div>
+            <div>
+              <div style={{ fontSize: '13.5px', fontWeight: '800', color: 'var(--text-main)' }}>
+                Resep Terhubung ke {recipe.source_name || 'Website Sumber'}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Ringkasan alat & bahan ada di bawah. Buka link jika ingin membaca artikel / video aslinya.
+              </div>
+            </div>
+          </div>
+
+          <a
+            href={recipe.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+            style={{
+              padding: '8px 16px',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>Kunjungi Website Asli</span>
+            <ExternalLink size={14} />
+          </a>
+        </section>
+      )}
 
       {/* Tools Needed */}
       {recipe.tools && recipe.tools.length > 0 && (

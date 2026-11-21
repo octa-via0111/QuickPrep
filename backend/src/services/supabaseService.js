@@ -286,6 +286,8 @@ export const recipeService = {
       ),
       tips: recipeData.tips || '',
       tags: Array.isArray(recipeData.tags) ? recipeData.tags : [],
+      source_url: recipeData.source_url ? recipeData.source_url.trim() : null,
+      source_name: recipeData.source_name ? recipeData.source_name.trim() : null,
       is_popular: Boolean(recipeData.is_popular),
       is_kos_friendly: Boolean(recipeData.is_kos_friendly)
     };
@@ -334,6 +336,8 @@ export const recipeService = {
     }
     if (recipeData.tips !== undefined) updates.tips = recipeData.tips;
     if (recipeData.tags !== undefined) updates.tags = recipeData.tags;
+    if (recipeData.source_url !== undefined) updates.source_url = recipeData.source_url ? recipeData.source_url.trim() : null;
+    if (recipeData.source_name !== undefined) updates.source_name = recipeData.source_name ? recipeData.source_name.trim() : null;
     if (recipeData.is_popular !== undefined) updates.is_popular = Boolean(recipeData.is_popular);
     if (recipeData.is_kos_friendly !== undefined) updates.is_kos_friendly = Boolean(recipeData.is_kos_friendly);
 

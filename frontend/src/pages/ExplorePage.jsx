@@ -7,7 +7,9 @@ import {
   Clock, 
   Wallet, 
   Utensils, 
-  RotateCcw
+  RotateCcw,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
@@ -295,6 +297,91 @@ export const ExplorePage = () => {
           Menampilkan <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{recipes.length}</span> resep masakan
         </div>
       </div>
+
+      {/* External Recipe Search Suggestions */}
+      {search.trim() && (
+        <div className="card" style={{
+          padding: '14px 18px',
+          background: 'var(--bg-secondary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Globe size={18} color="var(--primary)" />
+            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
+              Cari variasi resep "{search.trim()}" di link website luar:
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <a
+              href={`https://cookpad.com/id/cari/${encodeURIComponent(search.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="badge"
+              style={{
+                background: 'var(--bg-card)',
+                color: 'var(--primary)',
+                border: '1px solid var(--border-subtle)',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: '700',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <span>Cookpad</span>
+              <ExternalLink size={12} />
+            </a>
+
+            <a
+              href={`https://www.youtube.com/results?search_query=resep+${encodeURIComponent(search.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="badge"
+              style={{
+                background: 'var(--bg-card)',
+                color: '#DC2626',
+                border: '1px solid var(--border-subtle)',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: '700',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <span>YouTube</span>
+              <ExternalLink size={12} />
+            </a>
+
+            <a
+              href={`https://www.google.com/search?q=resep+${encodeURIComponent(search.trim())}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="badge"
+              style={{
+                background: 'var(--bg-card)',
+                color: '#2563EB',
+                border: '1px solid var(--border-subtle)',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: '700',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <span>Google</span>
+              <ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Recipes Grid */}
       {loading ? (

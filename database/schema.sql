@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS recipes (
     instructions JSONB NOT NULL DEFAULT '[]'::jsonb, -- Array step: [{step_number, title, instruction, duration_minutes, tips}]
     tips TEXT,
     tags TEXT[] DEFAULT '{}',
+    source_url TEXT, -- Link website atau video sumber resep asli
+    source_name VARCHAR(100), -- Nama sumber (misal: Cookpad, YouTube, Endeus TV)
     is_popular BOOLEAN DEFAULT false,
     is_kos_friendly BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW()

@@ -92,6 +92,21 @@ export const RecipeCard = ({ recipe }) => {
               Anak Kos
             </span>
           )}
+
+          {recipe.source_name && (
+            <span 
+              className="badge" 
+              style={{
+                background: 'rgba(38, 15, 61, 0.85)',
+                color: '#FFFFFF',
+                fontSize: '10px',
+                padding: '2px 7px',
+                backdropFilter: 'blur(4px)'
+              }}
+            >
+              🌐 {recipe.source_name}
+            </span>
+          )}
         </div>
 
         {/* Favorite Button Top Right */}

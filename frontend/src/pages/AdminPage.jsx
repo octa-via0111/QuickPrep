@@ -29,7 +29,9 @@ import {
   LogOut,
   LogIn,
   ShieldAlert,
-  User
+  User,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import recipeService from '../services/recipeService.js';
@@ -89,6 +91,8 @@ export const AdminPage = () => {
     is_popular: false,
     is_kos_friendly: true,
     tips: '',
+    source_name: '',
+    source_url: '',
     instructions: [
       { step_number: 1, title: 'Persiapan Bahan', instruction: '', duration_minutes: 3, tips: '' }
     ]
@@ -172,6 +176,8 @@ export const AdminPage = () => {
       is_popular: false,
       is_kos_friendly: true,
       tips: '',
+      source_name: '',
+      source_url: '',
       instructions: [
         { step_number: 1, title: 'Persiapan Bahan', instruction: 'Siapkan seluruh bumbu dan bahan yang dibutuhkan.', duration_minutes: 3, tips: '' },
         { step_number: 2, title: 'Memasak', instruction: 'Masak dengan api sedang hingga matang merata.', duration_minutes: 10, tips: '' }
@@ -212,6 +218,8 @@ export const AdminPage = () => {
       is_popular: Boolean(recipe.is_popular),
       is_kos_friendly: Boolean(recipe.is_kos_friendly),
       tips: recipe.tips || '',
+      source_name: recipe.source_name || '',
+      source_url: recipe.source_url || '',
       instructions: parsedInstructions
     });
     setImagePreview(recipe.image_url || '');
@@ -1526,6 +1534,54 @@ export const AdminPage = () => {
                   value={formData.tips}
                   onChange={(e) => setFormData({ ...formData, tips: e.target.value })}
                 />
+              </div>
+
+              {/* Tautan Website Sumber Resep (Opsional) */}
+              <div style={{
+                padding: '16px',
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                border: '1px solid var(--border-subtle)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <label style={{ fontSize: '13.5px', fontWeight: '800', color: 'var(--purple-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Globe size={16} color="var(--primary)" /> Tautan / Website Sumber Resep (Opsional)
+                  </label>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                    Hubungkan ke link Cookpad, YouTube, dll.
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
+                      Nama Sumber Website
+                    </label>
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder="Contoh: Cookpad / YouTube Masak"
+                      value={formData.source_name}
+                      onChange={(e) => setFormData({ ...formData, source_name: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
+                      Link URL Website Asli
+                    </label>
+                    <input
+                      type="url"
+                      className="input-field"
+                      placeholder="https://cookpad.com/... atau https://youtube.com/..."
+                      value={formData.source_url}
+                      onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Row 5: Langkah-Langkah Memasak */}
