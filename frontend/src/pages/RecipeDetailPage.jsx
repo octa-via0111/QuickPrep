@@ -80,8 +80,9 @@ export const RecipeDetailPage = () => {
     }
 
     const subList = [];
+    const recipeIngredients = recipe?.ingredients || [];
     Object.entries(appliedSubstitutions).forEach(([idx, subName]) => {
-      const orig = ingredientsList[idx]?.originalName || ingredientsList[idx]?.name;
+      const orig = recipeIngredients[idx]?.name;
       if (orig && subName) {
         subList.push({ original: orig.trim(), substitute: subName.trim() });
       }
@@ -122,7 +123,7 @@ export const RecipeDetailPage = () => {
         substitutionChanges: changes
       };
     });
-  }, [recipe, appliedSubstitutions, ingredientsList]);
+  }, [recipe, appliedSubstitutions]);
 
   const toggleCheckIngredient = (index) => {
     setCheckedIngredients(prev => ({
