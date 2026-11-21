@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Wallet, Info, ArrowRight, Check, Filter } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import RecipeCard from '../components/RecipeCard.jsx';
@@ -7,14 +8,25 @@ import { formatRupiah } from '../utils/formatter.js';
 const BUDGET_PRESETS = [5000, 10000, 15000, 20000, 25000];
 
 export const BudgetPage = () => {
-  const [selectedBudget, setSelectedBudget] = useState(15000);
-  const [customInput, setCustomInput] = useState('');
+  const [searchParams] = useSearchParams();
+  const urlBudget = Number(searchParams.get('maxBudget')) || Number(searchParams.get('max_budget'));
+  const [selectedBudget, setSelectedBudget] = useState(urlBudget || 15000);
+  const [customInput, setCustomInput] = useState(urlBudget && !BUDGET_PRESETS.includes(urlBudget) ? String(urlBudget) : '');
 
   // Fetch filtered recipes strictly <= selectedBudget from API
   const { recipes, loading } = useRecipes({
-    maxBudget: selectedBudget,
+    maxBudget: selectedBudget > 0 ? selectedBudget : undefined,
     sort: 'cost_asc'
   });
+
+  // Client-side safety filter & guarantee sorting by estimated_cost ascending
+  const filteredRecipes = useMemo(() => {
+    if (!recipes || !Array.isArray(recipes)) return [];
+    if (!selectedBudget || selectedBudget <= 0) return [];
+    return recipes
+      .filter(r => (Number(r.estimated_cost) || 0) <= selectedBudget)
+      .sort((a, b) => (Number(a.estimated_cost) || 0) - (Number(b.estimated_cost) || 0));
+  }, [recipes, selectedBudget]);
 
   const handlePresetClick = (amount) => {
     setSelectedBudget(amount);
@@ -26,6 +38,8 @@ export const BudgetPage = () => {
     setCustomInput(val);
     if (val) {
       setSelectedBudget(Number(val));
+    } else {
+      setSelectedBudget(0);
     }
   };
 
@@ -148,7 +162,7 @@ export const BudgetPage = () => {
           </div>
 
           <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--sage)' }}>
-            Ditemukan {recipes.length} menu yang memenuhi syarat
+            Ditemukan {filteredRecipes.length} menu yang memenuhi syarat
           </span>
         </div>
       </section>
@@ -186,7 +200,7 @@ export const BudgetPage = () => {
               <div key={n} className="card skeleton" style={{ height: '280px' }} />
             ))}
           </div>
-        ) : recipes.length === 0 ? (
+        ) : filteredRecipes.length === 0 ? (
           <div className="card" style={{ padding: '40px 20px', textAlign: 'center' }}>
             <Wallet size={36} color="var(--primary)" style={{ margin: '0 auto 12px' }} />
             <h3 style={{ fontSize: '17px', fontWeight: '700', marginBottom: '6px' }}>
@@ -205,7 +219,7 @@ export const BudgetPage = () => {
           </div>
         ) : (
           <div className="grid-recipes">
-            {recipes.map(recipe => (
+            {filteredRecipes.map(recipe => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
           </div>

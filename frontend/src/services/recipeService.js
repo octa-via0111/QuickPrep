@@ -83,11 +83,21 @@ export const recipeService = {
       }
     });
 
+    const budgetLimit = cleanParams.maxBudget || cleanParams.max_budget;
+    const cookingTimeLimit = cleanParams.maxCookingTime || cleanParams.max_cooking_time;
+    const isKos = cleanParams.isKosFriendly !== undefined ? cleanParams.isKosFriendly : cleanParams.is_kos_friendly;
+    const isPop = cleanParams.isPopular !== undefined ? cleanParams.isPopular : cleanParams.is_popular;
+    const sortOrder = cleanParams.sort;
+
     // 1. Coba lewat API backend jika ada
     try {
       const response = await api.get('/recipes', { params: cleanParams });
       if (response && response.data) {
-        return response;
+        let resultData = response.data;
+        if (budgetLimit && Array.isArray(resultData)) {
+          resultData = resultData.filter(r => (Number(r.estimated_cost) || 0) <= Number(budgetLimit));
+        }
+        return { ...response, data: resultData, count: resultData?.length };
       }
     } catch (apiErr) {
       // Backend offline atau 404 (misal saat dideploy di Vercel frontend)
@@ -113,26 +123,37 @@ export const recipeService = {
         if (cleanParams.category && cleanParams.category !== 'semua') {
           query = query.eq('category_id', cleanParams.category);
         }
-        if (cleanParams.max_budget) {
-          query = query.lte('estimated_cost', Number(cleanParams.max_budget));
+        if (budgetLimit) {
+          query = query.lte('estimated_cost', Number(budgetLimit));
         }
-        if (cleanParams.max_cooking_time) {
-          query = query.lte('cooking_time', Number(cleanParams.max_cooking_time));
+        if (cookingTimeLimit) {
+          query = query.lte('cooking_time', Number(cookingTimeLimit));
         }
         if (cleanParams.difficulty && cleanParams.difficulty !== 'semua') {
           query = query.eq('difficulty', cleanParams.difficulty);
         }
-        if (cleanParams.is_popular === 'true' || cleanParams.is_popular === true) {
+        if (isPop === 'true' || isPop === true) {
           query = query.eq('is_popular', true);
         }
-        if (cleanParams.is_kos_friendly === 'true' || cleanParams.is_kos_friendly === true) {
+        if (isKos === 'true' || isKos === true) {
           query = query.eq('is_kos_friendly', true);
         }
         if (cleanParams.search) {
           query = query.ilike('name', `%${cleanParams.search}%`);
         }
 
-        query = query.order('created_at', { ascending: false });
+        // Sorting
+        if (sortOrder === 'cost_asc') {
+          query = query.order('estimated_cost', { ascending: true });
+        } else if (sortOrder === 'cost_desc') {
+          query = query.order('estimated_cost', { ascending: false });
+        } else if (sortOrder === 'time_asc') {
+          query = query.order('cooking_time', { ascending: true });
+        } else if (sortOrder === 'popular') {
+          query = query.order('is_popular', { ascending: false });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
 
         const { data, error } = await query;
         if (!error && Array.isArray(data)) {
@@ -145,6 +166,11 @@ export const recipeService = {
               const recipeToolIds = (r.tools || []).map(t => t.id || t);
               return recipeToolIds.some(tid => toolList.includes(tid));
             });
+          }
+
+          // Safety filter: pastikan ketat tidak melebihi budgetLimit
+          if (budgetLimit) {
+            formatted = formatted.filter(r => (Number(r.estimated_cost) || 0) <= Number(budgetLimit));
           }
 
           return {
@@ -163,12 +189,20 @@ export const recipeService = {
     if (cleanParams.category && cleanParams.category !== 'semua') {
       localData = localData.filter(r => r.category_id === cleanParams.category);
     }
-    if (cleanParams.max_budget) {
-      localData = localData.filter(r => r.estimated_cost <= Number(cleanParams.max_budget));
+    if (budgetLimit) {
+      localData = localData.filter(r => (Number(r.estimated_cost) || 0) <= Number(budgetLimit));
+    }
+    if (cookingTimeLimit) {
+      localData = localData.filter(r => (Number(r.cooking_time) || 0) <= Number(cookingTimeLimit));
     }
     if (cleanParams.search) {
       const q = cleanParams.search.toLowerCase();
       localData = localData.filter(r => (r.name || '').toLowerCase().includes(q));
+    }
+    if (sortOrder === 'cost_asc') {
+      localData.sort((a, b) => (Number(a.estimated_cost) || 0) - (Number(b.estimated_cost) || 0));
+    } else if (sortOrder === 'cost_desc') {
+      localData.sort((a, b) => (Number(b.estimated_cost) || 0) - (Number(a.estimated_cost) || 0));
     }
 
     return {
