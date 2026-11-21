@@ -17,10 +17,13 @@ import {
   Play,
   Globe,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Edit3,
+  Settings
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import { useFavorites } from '../hooks/useFavorites.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import SubstitutionModal from '../components/SubstitutionModal.jsx';
 
@@ -29,6 +32,7 @@ export const RecipeDetailPage = () => {
   const navigate = useNavigate();
   const { recipe, loading, error } = useRecipeDetail(id);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { isAdmin } = useAuth();
 
   // Serving Scaler state
   const [servings, setServings] = useState(1);
@@ -335,6 +339,24 @@ export const RecipeDetailPage = () => {
         >
           <ChefHat size={20} />
           <span>Mulai Masak Langkah demi Langkah</span>
+        </Link>
+
+        <Link
+          to="/admin"
+          className="btn-secondary"
+          style={{
+            padding: '14px 20px',
+            fontSize: '14px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            textDecoration: 'none'
+          }}
+          title="Buka Panel Admin untuk Mengedit atau Menambah Resep"
+        >
+          <Edit3 size={18} color="var(--primary)" />
+          <span>Kelola Resep (Admin)</span>
         </Link>
       </div>
 

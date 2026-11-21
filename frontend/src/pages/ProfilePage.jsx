@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   User, 
   Settings, 
@@ -123,6 +124,48 @@ export const ProfilePage = () => {
         <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           Kelola profil pengguna, preferensi alat memasak, riwayat masakan, serta informasi lengkap aplikasi QuickPrep.
         </p>
+      </div>
+
+      {/* Admin Panel Quick Shortcut */}
+      <div className="card" style={{
+        padding: '18px 22px',
+        background: 'var(--purple-dark)',
+        color: '#FFFFFF',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px',
+        boxShadow: 'var(--shadow-purple)'
+      }}>
+        <div>
+          <div style={{ fontSize: '15.5px', fontWeight: '800', color: '#FFF' }}>
+            Panel Admin Resep Masakan
+          </div>
+          <div style={{ fontSize: '12.5px', color: 'rgba(255, 255, 255, 0.85)', marginTop: '2px' }}>
+            Tambah resep baru, ubah foto makanan dari file manager, dan edit data resep.
+          </div>
+        </div>
+
+        <Link
+          to="/admin"
+          style={{
+            background: 'var(--primary)',
+            color: '#FFFFFF',
+            padding: '9px 18px',
+            borderRadius: '999px',
+            fontSize: '13px',
+            fontWeight: '700',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: 'var(--shadow-warm)',
+            textDecoration: 'none'
+          }}
+        >
+          <Settings size={15} />
+          <span>Buka Panel Admin</span>
+        </Link>
       </div>
 
       {savedAlert && (
