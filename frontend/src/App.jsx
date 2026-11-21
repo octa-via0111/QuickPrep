@@ -12,6 +12,7 @@ import FavoritesPage from './pages/FavoritesPage.jsx';
 import RecipeDetailPage from './pages/RecipeDetailPage.jsx';
 import CookingModePage from './pages/CookingModePage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/recipe/:id" element={<RecipeDetailPage />} />
           <Route path="/cook/:id" element={<CookingModePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/about" element={<Navigate to="/profile" replace />} />
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

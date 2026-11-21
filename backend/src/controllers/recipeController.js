@@ -69,3 +69,79 @@ export const getRecipeSubstitutions = async (req, res, next) => {
     next(error);
   }
 };
+
+export const createRecipe = async (req, res, next) => {
+  try {
+    const { name, estimated_cost } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nama resep wajib diisi'
+      });
+    }
+
+    const created = await recipeService.createRecipe(req.body);
+    return res.status(201).json({
+      success: true,
+      message: 'Resep baru berhasil ditambahkan',
+      data: created
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateRecipe = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Parameter ID resep wajib disertakan'
+      });
+    }
+
+    const updated = await recipeService.updateRecipe(id, req.body);
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resep tidak ditemukan untuk diperbarui'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Resep berhasil diperbarui',
+      data: updated
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRecipe = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Parameter ID resep wajib disertakan'
+      });
+    }
+
+    const success = await recipeService.deleteRecipe(id);
+    if (!success) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resep tidak ditemukan untuk dihapus'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Resep berhasil dihapus'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -26,6 +26,27 @@ export const recipeService = {
    */
   async getRecipeSubstitutions(id) {
     return api.get(`/recipes/${id}/substitutions`);
+  },
+
+  /**
+   * Tambah resep baru (Admin)
+   */
+  async createRecipe(recipeData) {
+    return api.post('/recipes', recipeData);
+  },
+
+  /**
+   * Update resep yang ada (Admin)
+   */
+  async updateRecipe(id, recipeData) {
+    return api.put(`/recipes/${id}`, recipeData);
+  },
+
+  /**
+   * Hapus resep (Admin)
+   */
+  async deleteRecipe(id) {
+    return api.delete(`/recipes/${id}`);
   }
 };
 

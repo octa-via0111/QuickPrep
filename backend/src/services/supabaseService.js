@@ -233,6 +233,139 @@ export const recipeService = {
     // Fallback: search in seedRecipes
     const found = seedRecipes.find(r => r.id === id || r.slug === id);
     return found ? enrichRecipe(found) : null;
+  },
+
+  async createRecipe(recipeData) {
+    const id = recipeData.id || `rec-${Date.now()}`;
+    const slug = recipeData.slug || (recipeData.name || 'resep')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+    
+    const cost = Number(recipeData.estimated_cost) || 10000;
+    const servings = Number(recipeData.servings) || 1;
+    const costPerServing = Number(recipeData.cost_per_serving) || Math.round(cost / servings);
+
+    const record = {
+      id,
+      name: recipeData.name,
+      slug,
+      description: recipeData.description || '',
+      image_url: recipeData.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80',
+      category_id: recipeData.category_id || 'anak-kos',
+      cooking_time: Number(recipeData.cooking_time) || 15,
+      preparation_time: Number(recipeData.preparation_time) || 5,
+      estimated_cost: cost,
+      cost_per_serving: costPerServing,
+      servings,
+      difficulty: recipeData.difficulty || 'Mudah',
+      instructions: Array.isArray(recipeData.instructions) ? recipeData.instructions : (
+        typeof recipeData.instructions === 'string' ? JSON.parse(recipeData.instructions || '[]') : []
+      ),
+      tips: recipeData.tips || '',
+      tags: Array.isArray(recipeData.tags) ? recipeData.tags : [],
+      is_popular: Boolean(recipeData.is_popular),
+      is_kos_friendly: Boolean(recipeData.is_kos_friendly)
+    };
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('recipes')
+          .insert([record])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return enrichRecipe(data);
+      } catch (err) {
+        console.warn('[SupabaseService] Gagal insert resep ke Supabase:', err.message);
+      }
+    }
+
+    // Fallback: in-memory push
+    seedRecipes.unshift(record);
+    return enrichRecipe(record);
+  },
+
+  async updateRecipe(id, recipeData) {
+    const cost = recipeData.estimated_cost !== undefined ? Number(recipeData.estimated_cost) : undefined;
+    const servings = recipeData.servings !== undefined ? Number(recipeData.servings) : undefined;
+    const costPerServing = cost && servings ? Math.round(cost / servings) : recipeData.cost_per_serving;
+
+    const updates = {};
+    if (recipeData.name !== undefined) updates.name = recipeData.name;
+    if (recipeData.slug !== undefined) updates.slug = recipeData.slug;
+    if (recipeData.description !== undefined) updates.description = recipeData.description;
+    if (recipeData.image_url !== undefined) updates.image_url = recipeData.image_url;
+    if (recipeData.category_id !== undefined) updates.category_id = recipeData.category_id;
+    if (recipeData.cooking_time !== undefined) updates.cooking_time = Number(recipeData.cooking_time);
+    if (recipeData.preparation_time !== undefined) updates.preparation_time = Number(recipeData.preparation_time);
+    if (cost !== undefined) updates.estimated_cost = cost;
+    if (servings !== undefined) updates.servings = servings;
+    if (costPerServing !== undefined) updates.cost_per_serving = Number(costPerServing);
+    if (recipeData.difficulty !== undefined) updates.difficulty = recipeData.difficulty;
+    if (recipeData.instructions !== undefined) {
+      updates.instructions = Array.isArray(recipeData.instructions) ? recipeData.instructions : (
+        typeof recipeData.instructions === 'string' ? JSON.parse(recipeData.instructions || '[]') : []
+      );
+    }
+    if (recipeData.tips !== undefined) updates.tips = recipeData.tips;
+    if (recipeData.tags !== undefined) updates.tags = recipeData.tags;
+    if (recipeData.is_popular !== undefined) updates.is_popular = Boolean(recipeData.is_popular);
+    if (recipeData.is_kos_friendly !== undefined) updates.is_kos_friendly = Boolean(recipeData.is_kos_friendly);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('recipes')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return enrichRecipe(data);
+      } catch (err) {
+        console.warn('[SupabaseService] Gagal update resep di Supabase:', err.message);
+      }
+    }
+
+    // Fallback: in-memory update
+    const idx = seedRecipes.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      seedRecipes[idx] = { ...seedRecipes[idx], ...updates };
+      return enrichRecipe(seedRecipes[idx]);
+    }
+    return null;
+  },
+
+  async deleteRecipe(id) {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        // Cascade delete on related records
+        await supabase.from('recipe_ingredients').delete().eq('recipe_id', id);
+        await supabase.from('recipe_tools').delete().eq('recipe_id', id);
+        
+        const { error } = await supabase
+          .from('recipes')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        return true;
+      } catch (err) {
+        console.warn('[SupabaseService] Gagal hapus resep di Supabase:', err.message);
+      }
+    }
+
+    // Fallback: in-memory delete
+    const idx = seedRecipes.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      seedRecipes.splice(idx, 1);
+      return true;
+    }
+    return false;
   }
 };
 

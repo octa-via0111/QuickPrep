@@ -31,7 +31,8 @@ export const Navbar = () => {
     { to: '/budget', label: 'Budget' },
     { to: '/spin', label: 'Spin' },
     { to: '/favorites', label: 'Favorit', count: favoriteCount },
-    { to: '/profile', label: 'Profil' }
+    { to: '/profile', label: 'Profil' },
+    { to: '/admin', label: 'Admin' }
   ];
 
   return (
