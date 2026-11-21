@@ -1,29 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   UtensilsCrossed, 
-  Wifi, 
-  WifiOff, 
   Download, 
-  Search, 
   Heart,
-  ShieldCheck
+  ShieldCheck,
+  User,
+  LogIn,
+  LogOut,
+  ChevronDown
 } from 'lucide-react';
 import useOnlineStatus from '../hooks/useOnlineStatus.js';
 import { subscribeToInstallPrompt, promptPWAInstall } from '../utils/pwa.js';
 import { useFavorites } from '../hooks/useFavorites.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export const Navbar = () => {
   const isOnline = useOnlineStatus();
   const location = useLocation();
   const { count: favoriteCount } = useFavorites();
+  const { currentUser, isAdmin, isUser, openLogin, logout } = useAuth();
+  
   const [canInstall, setCanInstall] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = subscribeToInstallPrompt((supported) => {
       setCanInstall(supported);
     });
     return unsubscribe;
+  }, []);
+
+  // Close dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const navLinks = [
@@ -129,29 +146,182 @@ export const Navbar = () => {
           })}
         </nav>
 
-        {/* Right Action Icons: Admin & PWA Install */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Admin Panel Link Button */}
-          <Link
-            to="/admin"
-            title="Panel Admin"
-            style={{
-              padding: '7px 14px',
-              borderRadius: '999px',
-              fontSize: '13px',
-              fontWeight: '700',
-              background: location.pathname === '/admin' ? 'var(--primary)' : 'var(--purple-dark)',
-              color: '#FFFFFF',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: 'var(--shadow-purple)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ShieldCheck size={14} />
-            <span>Admin</span>
-          </Link>
+        {/* Right Action: Menu Masuk / Profil User & PWA Install */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* 1. Belum Login: Tampilkan Tombol Masuk */}
+          {!currentUser ? (
+            <button
+              onClick={() => openLogin('user')}
+              title="Masuk ke Akun"
+              style={{
+                padding: '8px 16px',
+                borderRadius: '999px',
+                fontSize: '13.5px',
+                fontWeight: '700',
+                background: 'var(--primary)',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                border: 'none',
+                boxShadow: 'var(--shadow-warm)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <LogIn size={15} />
+              <span>Masuk</span>
+            </button>
+          ) : (
+            /* 2. Sudah Login: Tampilkan Pill User / Admin dengan Menu Dropdown */
+            <div style={{ position: 'relative' }} ref={menuRef}>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '999px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  background: isAdmin ? 'var(--purple-dark)' : 'var(--bg-secondary)',
+                  color: isAdmin ? '#FFFFFF' : 'var(--purple-dark)',
+                  border: isAdmin ? 'none' : '1px solid var(--border-subtle)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: isAdmin ? 'var(--shadow-purple)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {isAdmin ? (
+                  <>
+                    <ShieldCheck size={16} color="var(--primary)" />
+                    <span>Admin</span>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      background: 'var(--primary)',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: '800'
+                    }}>
+                      {(currentUser.name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <span>{currentUser.name ? (currentUser.name.length > 12 ? currentUser.name.substring(0, 10) + '...' : currentUser.name) : 'Pengguna'}</span>
+                  </>
+                )}
+                <ChevronDown size={14} style={{ transform: isMenuOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.15s ease' }} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isMenuOpen && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 8px)',
+                  background: '#FFFDF9',
+                  borderRadius: '16px',
+                  border: '1px solid var(--border-subtle)',
+                  boxShadow: '0 10px 30px rgba(31, 14, 52, 0.18)',
+                  minWidth: '190px',
+                  padding: '8px',
+                  zIndex: 100,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  animation: 'fadeIn 0.15s ease'
+                }}>
+                  {/* Info Header */}
+                  <div style={{
+                    padding: '8px 10px 8px',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    marginBottom: '4px'
+                  }}>
+                    <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--purple-dark)' }}>
+                      {currentUser.name || (isAdmin ? 'Administrator' : 'Pengguna')}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {isAdmin ? 'Peran: Administrator' : (currentUser.email || 'Akun Pengguna')}
+                    </div>
+                  </div>
+
+                  {/* Menu Link Sesuai Peran */}
+                  {isAdmin ? (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: 'var(--purple-dark)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <ShieldCheck size={16} color="var(--primary)" />
+                      <span>Panel Admin</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: 'var(--purple-dark)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <User size={16} color="var(--primary)" />
+                      <span>Profil Saya</span>
+                    </Link>
+                  )}
+
+                  {/* Tombol Keluar / Logout */}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      logout();
+                    }}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      color: 'var(--alert-red)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      width: '100%'
+                    }}
+                  >
+                    <LogOut size={16} />
+                    <span>Keluar (Logout)</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* PWA Install Button if available */}
           {canInstall && (

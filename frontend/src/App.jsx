@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
+import AuthModal from './components/AuthModal.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 
 import HomePage from './pages/HomePage.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
@@ -16,34 +18,39 @@ import AdminPage from './pages/AdminPage.jsx';
 
 function App() {
   return (
-    <div className="app-container">
-      {/* Offline Status Warning Bar */}
-      <OfflineBanner />
+    <AuthProvider>
+      <div className="app-container">
+        {/* Offline Status Warning Bar */}
+        <OfflineBanner />
 
-      {/* Top Sticky Navigation */}
-      <Navbar />
+        {/* Global Auth Modal for Pengguna & Admin */}
+        <AuthModal />
 
-      {/* Main Content View */}
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/budget" element={<BudgetPage />} />
-          <Route path="/spin" element={<SpinPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-          <Route path="/cook/:id" element={<CookingModePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/about" element={<Navigate to="/profile" replace />} />
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+        {/* Top Sticky Navigation */}
+        <Navbar />
 
-      {/* Mobile Bottom Navigation Bar (5 tabs) */}
-      <BottomNav />
-    </div>
+        {/* Main Content View */}
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/budget" element={<BudgetPage />} />
+            <Route path="/spin" element={<SpinPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+            <Route path="/cook/:id" element={<CookingModePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/about" element={<Navigate to="/profile" replace />} />
+            {/* Catch-all fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        {/* Mobile Bottom Navigation Bar (5 tabs) */}
+        <BottomNav />
+      </div>
+    </AuthProvider>
   );
 }
 

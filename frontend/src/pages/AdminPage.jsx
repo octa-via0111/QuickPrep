@@ -27,9 +27,11 @@ import {
   Eye,
   EyeOff,
   LogOut,
-  LogIn
+  LogIn,
+  ShieldAlert,
+  User
 } from 'lucide-react';
-import authService from '../services/authService.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import recipeService from '../services/recipeService.js';
 import toolService from '../services/toolService.js';
 import substitutionService from '../services/substitutionService.js';
@@ -38,10 +40,9 @@ import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter
 
 export const AdminPage = () => {
   const navigate = useNavigate();
+  const { currentUser, isAdmin, isUser, loginAsAdmin, logout, openLogin } = useAuth();
 
-  // Authentication States
-  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isAuthenticated());
-  const [adminUser, setAdminUser] = useState(() => authService.getUser());
+  // Local Form States for Admin Login
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -115,10 +116,10 @@ export const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAdmin) {
       loadData();
     }
-  }, [isAuthenticated]);
+  }, [isAdmin]);
 
   const showAlert = (type, text) => {
     setAlertMsg({ type, text });
@@ -131,20 +132,14 @@ export const AdminPage = () => {
     setLoginError('');
 
     if (!loginUsername.trim() || !loginPassword.trim()) {
-      setLoginError('Username dan kata sandi wajib diisi!');
+      setLoginError('Username dan kata sandi admin wajib diisi!');
       return;
     }
 
     try {
       setLoginLoading(true);
-      const res = await authService.login(loginUsername.trim(), loginPassword);
-      if (res?.success) {
-        setIsAuthenticated(true);
-        setAdminUser(res.data?.user || { username: loginUsername.trim(), role: 'Administrator' });
-        showAlert('success', 'Selamat datang! Anda berhasil masuk sebagai Administrator.');
-      } else {
-        setLoginError('Akses ditolak! Kredensial tidak valid. Hanya administrator yang dapat masuk.');
-      }
+      await loginAsAdmin(loginUsername.trim(), loginPassword);
+      showAlert('success', 'Selamat datang! Anda berhasil masuk sebagai Administrator.');
     } catch (err) {
       setLoginError('Akses ditolak! Anda bukan administrator atau kredensial yang dimasukkan salah.');
     } finally {
@@ -154,9 +149,7 @@ export const AdminPage = () => {
 
   // Handle Admin Logout
   const handleLogout = () => {
-    authService.logout();
-    setIsAuthenticated(false);
-    setAdminUser(null);
+    logout();
     setLoginUsername('');
     setLoginPassword('');
     showAlert('success', 'Sesi admin berakhir. Anda telah keluar dengan aman.');
@@ -440,8 +433,114 @@ export const AdminPage = () => {
     }
   };
 
-  // Jika belum login, tampilkan Login Gate Administrator
-  if (!isAuthenticated) {
+  // ==========================================
+  // JIKA BUKAN ADMINISTRATOR
+  // ==========================================
+  if (!isAdmin) {
+    // 1. Jika pengguna saat ini login dengan role Pengguna (User)
+    if (currentUser && isUser) {
+      return (
+        <div style={{
+          minHeight: '75vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px 16px'
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '440px',
+            background: 'var(--card-bg)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'var(--shadow-card)',
+            overflow: 'hidden',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              background: 'var(--purple-dark)',
+              padding: '28px 24px 22px',
+              color: '#FFFFFF'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                background: 'var(--alert-red)',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 6px 18px rgba(220, 38, 38, 0.35)'
+              }}>
+                <ShieldAlert size={28} color="#FFFFFF" strokeWidth={2.2} />
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', margin: '0 0 6px', color: '#FFFFFF' }}>
+                Akses Ditolak: Khusus Admin
+              </h2>
+              <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: 1.45 }}>
+                Halo, <strong>{currentUser.name}</strong>! Anda saat ini masuk dengan akun <strong>Pengguna</strong>.
+              </p>
+            </div>
+
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                Pengguna reguler tidak memiliki hak akses untuk mengedit, menambah, atau menghapus menu resep. Halaman ini hanya untuk Administrator.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => openLogin('admin')}
+                style={{
+                  width: '100%',
+                  height: '44px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--purple-dark)',
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                  fontSize: '13.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  border: 'none',
+                  boxShadow: 'var(--shadow-purple)'
+                }}
+              >
+                <ShieldCheck size={17} />
+                <span>Masuk Sebagai Admin</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'transparent',
+                  color: 'var(--text-muted)',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  border: 'none'
+                }}
+              >
+                <ArrowLeft size={16} />
+                <span>Kembali ke Beranda</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 2. Jika belum login sama sekali (Guest)
     return (
       <div style={{
         minHeight: '75vh',
@@ -494,7 +593,7 @@ export const AdminPage = () => {
               margin: 0,
               lineHeight: 1.45
             }}>
-              Area khusus pengelola. Masukkan username dan kata sandi untuk mengelola resep.
+              Area khusus pengelola. Masukkan username dan kata sandi admin untuk mengelola resep.
             </p>
           </div>
 
@@ -675,7 +774,7 @@ export const AdminPage = () => {
             fontWeight: '700'
           }}>
             <ShieldCheck size={16} color="var(--primary)" />
-            <span>Admin: <strong>{adminUser?.username || 'admin'}</strong></span>
+            <span>Admin: <strong>{currentUser?.name || currentUser?.username || 'Administrator'}</strong></span>
           </div>
         </div>
 

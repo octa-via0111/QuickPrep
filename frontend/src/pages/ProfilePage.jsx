@@ -30,6 +30,7 @@ import {
 import { formatRupiah } from '../utils/formatter.js';
 import toolService from '../services/toolService.js';
 import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const AVATAR_THEMES = [
   { color: '#260F3D', label: 'Ungu Gelap' },
@@ -41,11 +42,18 @@ const AVATAR_THEMES = [
 ];
 
 export const ProfilePage = () => {
+  const { currentUser, isAdmin } = useAuth();
   const [profile, setProfile] = useState(() => getStoredProfile());
   const [history, setHistory] = useState(() => getStoredHistory());
   const [toolsList, setToolsList] = useState([]);
   const [savedAlert, setSavedAlert] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.name) {
+      setProfile(prev => ({ ...prev, name: currentUser.name }));
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     toolService.getTools()
