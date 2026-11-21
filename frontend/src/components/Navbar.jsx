@@ -6,7 +6,8 @@ import {
   WifiOff, 
   Download, 
   Search, 
-  Heart
+  Heart,
+  ShieldCheck
 } from 'lucide-react';
 import useOnlineStatus from '../hooks/useOnlineStatus.js';
 import { subscribeToInstallPrompt, promptPWAInstall } from '../utils/pwa.js';
@@ -31,8 +32,7 @@ export const Navbar = () => {
     { to: '/budget', label: 'Budget' },
     { to: '/spin', label: 'Spin' },
     { to: '/favorites', label: 'Favorit', count: favoriteCount },
-    { to: '/profile', label: 'Profil' },
-    { to: '/admin', label: 'Admin' }
+    { to: '/profile', label: 'Profil' }
   ];
 
   return (
@@ -129,8 +129,30 @@ export const Navbar = () => {
           })}
         </nav>
 
-        {/* Right Action Icons: PWA Install (Online text removed) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Right Action Icons: Admin & PWA Install */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Admin Panel Link Button */}
+          <Link
+            to="/admin"
+            title="Panel Admin"
+            style={{
+              padding: '7px 14px',
+              borderRadius: '999px',
+              fontSize: '13px',
+              fontWeight: '700',
+              background: location.pathname === '/admin' ? 'var(--primary)' : 'var(--purple-dark)',
+              color: '#FFFFFF',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: 'var(--shadow-purple)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ShieldCheck size={14} />
+            <span>Admin</span>
+          </Link>
+
           {/* PWA Install Button if available */}
           {canInstall && (
             <button

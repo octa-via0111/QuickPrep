@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -11,26 +12,48 @@ import {
   Check, 
   AlertCircle, 
   ChefHat, 
-  Upload, 
-  ExternalLink,
-  SlidersHorizontal,
-  FolderOpen
+  FolderOpen,
+  UtensilsCrossed,
+  Home,
+  Flame,
+  Wrench,
+  RefreshCw,
+  Database,
+  ArrowLeft,
+  Menu,
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
 import recipeService from '../services/recipeService.js';
+import toolService from '../services/toolService.js';
+import substitutionService from '../services/substitutionService.js';
 import useCategories from '../hooks/useCategories.js';
 import { formatRupiah, formatTime, getDifficultyColor } from '../utils/formatter.js';
 
 export const AdminPage = () => {
+  const navigate = useNavigate();
+
+  // Data States
   const [recipes, setRecipes] = useState([]);
+  const [toolsList, setToolsList] = useState([]);
+  const [substitutionsList, setSubstitutionsList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+
+  // Active Sidebar Tab State
+  // Tabs: 'all' | 'kos' | 'popular' | 'categories' | 'tools' | 'substitutions' | 'system'
+  const [activeTab, setActiveTab] = useState('all');
+  const [sidebarSearch, setSidebarSearch] = useState('');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Recipe List Filter & Search State
+  const [recipeSearch, setRecipeSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('semua');
-  
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingRecipe, setEditingRecipe] = useState(null); // null = Add mode, object = Edit mode
+  const [editingRecipe, setEditingRecipe] = useState(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const [alertMsg, setAlertMsg] = useState(null); // { type: 'success' | 'error', text: '' }
+  const [alertMsg, setAlertMsg] = useState(null);
 
   // Categories hook
   const { categories } = useCategories();
@@ -54,26 +77,30 @@ export const AdminPage = () => {
     ]
   });
 
-  // Local image preview state
   const [imagePreview, setImagePreview] = useState('');
 
-  // Fetch all recipes
-  const loadRecipes = async () => {
+  // Load all initial data
+  const loadData = async () => {
     try {
       setLoading(true);
-      const res = await recipeService.getRecipes();
-      if (res && res.data) {
-        setRecipes(res.data);
-      }
+      const [resRecipes, resTools, resSubs] = await Promise.all([
+        recipeService.getRecipes().catch(() => ({ data: [] })),
+        toolService.getTools().catch(() => ({ data: [] })),
+        substitutionService.getSubstitutions().catch(() => ({ data: [] }))
+      ]);
+
+      if (resRecipes?.data) setRecipes(resRecipes.data);
+      if (resTools?.data) setToolsList(resTools.data);
+      if (resSubs?.data) setSubstitutionsList(resSubs.data);
     } catch (err) {
-      showAlert('error', 'Gagal memuat daftar resep dari server');
+      showAlert('error', 'Gagal memuat data dari server');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadRecipes();
+    loadData();
   }, []);
 
   const showAlert = (type, text) => {
@@ -110,7 +137,6 @@ export const AdminPage = () => {
   const handleOpenEditModal = (recipe) => {
     setEditingRecipe(recipe);
     
-    // Parse instructions if string
     let parsedInstructions = recipe.instructions;
     if (typeof parsedInstructions === 'string') {
       try {
@@ -144,20 +170,16 @@ export const AdminPage = () => {
     setIsModalOpen(true);
   };
 
-  // Handle local file selection from file manager
+  // Handle local file selection from File Manager
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Bersihkan nama file agar rapi
     const cleanFileName = file.name.replace(/\s+/g, '-').toLowerCase();
     const localPath = `/recipes/${cleanFileName}`;
-
-    // Buat URL object preview lokal instan
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
 
-    // Otomatis masukkan path ke form
     setFormData(prev => ({
       ...prev,
       image_url: localPath
@@ -210,17 +232,15 @@ export const AdminPage = () => {
     try {
       setFormSubmitting(true);
       if (editingRecipe) {
-        // Update Recipe
-        const res = await recipeService.updateRecipe(editingRecipe.id, formData);
+        await recipeService.updateRecipe(editingRecipe.id, formData);
         showAlert('success', `Resep "${formData.name}" berhasil diperbarui!`);
       } else {
-        // Create Recipe
-        const res = await recipeService.createRecipe(formData);
+        await recipeService.createRecipe(formData);
         showAlert('success', `Resep baru "${formData.name}" berhasil ditambahkan!`);
       }
 
       setIsModalOpen(false);
-      loadRecipes();
+      loadData();
     } catch (err) {
       showAlert('error', 'Terjadi kesalahan saat menyimpan resep.');
     } finally {
@@ -242,80 +262,162 @@ export const AdminPage = () => {
     }
   };
 
-  // Filtered recipes for display
+  // Filter recipes based on active tab and search filters
   const filteredRecipes = useMemo(() => {
     return recipes.filter(r => {
-      const matchSearch = search.trim() === '' || 
-        r.name.toLowerCase().includes(search.toLowerCase()) ||
-        (r.description && r.description.toLowerCase().includes(search.toLowerCase()));
+      // Tab filter
+      if (activeTab === 'kos' && !r.is_kos_friendly) return false;
+      if (activeTab === 'popular' && !r.is_popular) return false;
+
+      // Recipe search filter
+      const matchSearch = recipeSearch.trim() === '' || 
+        r.name.toLowerCase().includes(recipeSearch.toLowerCase()) ||
+        (r.description && r.description.toLowerCase().includes(recipeSearch.toLowerCase()));
       
+      // Category dropdown filter
       const matchCategory = selectedCategory === 'semua' || 
         r.category_id === selectedCategory || 
         r.category?.id === selectedCategory;
 
       return matchSearch && matchCategory;
     });
-  }, [recipes, search, selectedCategory]);
+  }, [recipes, activeTab, recipeSearch, selectedCategory]);
+
+  // Sidebar Menu Definitions
+  const sidebarSections = [
+    {
+      title: 'MANAJEMEN RESEP',
+      items: [
+        {
+          id: 'all',
+          label: 'Semua Resep',
+          icon: UtensilsCrossed,
+          iconBg: '#E0623A',
+          badge: recipes.length
+        },
+        {
+          id: 'add',
+          label: 'Tambah Resep Baru',
+          icon: Plus,
+          iconBg: '#4E7C5D',
+          isAction: true
+        },
+        {
+          id: 'kos',
+          label: 'Resep Anak Kos',
+          icon: Home,
+          iconBg: '#D97706',
+          badge: recipes.filter(r => r.is_kos_friendly).length
+        },
+        {
+          id: 'popular',
+          label: 'Resep Populer',
+          icon: Flame,
+          iconBg: '#D9534F',
+          badge: recipes.filter(r => r.is_popular).length
+        }
+      ]
+    },
+    {
+      title: 'DATA MASTER',
+      items: [
+        {
+          id: 'categories',
+          label: 'Kategori Masakan',
+          icon: FolderOpen,
+          iconBg: '#7C3AED',
+          badge: categories.length
+        },
+        {
+          id: 'tools',
+          label: 'Alat Masak Kos',
+          icon: Wrench,
+          iconBg: '#2563EB',
+          badge: toolsList.length
+        },
+        {
+          id: 'substitutions',
+          label: 'Substitusi Bahan',
+          icon: RefreshCw,
+          iconBg: '#0D9488',
+          badge: substitutionsList.length
+        }
+      ]
+    },
+    {
+      title: 'SISTEM',
+      items: [
+        {
+          id: 'system',
+          label: 'Status Database',
+          icon: Database,
+          iconBg: '#059669'
+        },
+        {
+          id: 'back_home',
+          label: 'Kembali ke Beranda',
+          icon: ArrowLeft,
+          iconBg: '#4B5563',
+          isAction: true
+        }
+      ]
+    }
+  ];
+
+  const handleSidebarItemClick = (item) => {
+    setIsMobileSidebarOpen(false);
+    if (item.id === 'add') {
+      handleOpenAddModal();
+    } else if (item.id === 'back_home') {
+      navigate('/');
+    } else {
+      setActiveTab(item.id);
+    }
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* 1. Header Admin */}
-      <div style={{
-        background: 'var(--purple-dark)',
-        color: '#FFFFFF',
-        padding: '28px 24px',
-        borderRadius: 'var(--radius-xl)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '16px',
-        boxShadow: 'var(--shadow-purple)'
-      }}>
-        <div>
-          <div style={{
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Mobile Sidebar Toggle Button */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <button
+          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+          className="admin-sidebar-mobile-toggle"
+          style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
-            background: 'var(--amber)',
+            gap: '8px',
+            padding: '10px 18px',
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--purple-dark)',
             color: '#FFFFFF',
-            padding: '4px 12px',
-            borderRadius: '999px',
-            fontSize: '12px',
+            fontSize: '13.5px',
             fontWeight: '700',
-            marginBottom: '8px'
-          }}>
-            <ChefHat size={14} /> Admin Dashboard QuickPrep
-          </div>
-          <h1 style={{ fontSize: '26px', fontWeight: '800', lineHeight: 1.2, color: '#FFF' }}>
-            Kelola Menu Masakan
-          </h1>
-          <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', marginTop: '4px' }}>
-            Tambah resep baru, ubah foto makanan, perbarui estimasi harga, durasi, dan langkah memasak.
-          </p>
-        </div>
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-purple)'
+          }}
+        >
+          <Menu size={18} />
+          <span>Menu Navigasi Admin</span>
+        </button>
 
         <button
           onClick={handleOpenAddModal}
           style={{
-            background: 'var(--primary)',
-            color: '#FFFFFF',
-            padding: '12px 22px',
-            borderRadius: '999px',
-            fontWeight: '700',
-            fontSize: '14px',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '6px',
+            padding: '10px 18px',
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--primary)',
+            color: '#FFFFFF',
+            fontSize: '13px',
+            fontWeight: '700',
             cursor: 'pointer',
-            boxShadow: 'var(--shadow-warm)',
-            transition: 'all 0.2s ease'
+            boxShadow: 'var(--shadow-warm)'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          <Plus size={18} strokeWidth={2.5} />
-          <span>Tambah Resep Baru</span>
+          <Plus size={16} />
+          <span>Tambah Resep</span>
         </button>
       </div>
 
@@ -338,235 +440,582 @@ export const AdminPage = () => {
         </div>
       )}
 
-      {/* 2. Quick Stats Bar */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '12px'
-      }}>
-        <div className="card" style={{ padding: '16px 20px', borderLeft: '4px solid var(--purple-dark)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Total Seluruh Menu</div>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--purple-dark)', marginTop: '2px' }}>
-            {recipes.length} <span style={{ fontSize: '13px', fontWeight: '500' }}>Resep</span>
+      {/* Main Admin Layout: Sidebar on Left, Content on Right */}
+      <div className="admin-layout">
+        {/* ==================================================== */}
+        {/* 1. SIDEBAR NAVIGASI (Sleek Dark Theme Sesuai Gambar) */}
+        {/* ==================================================== */}
+        <aside className={`admin-sidebar ${isMobileSidebarOpen ? 'open' : ''}`}>
+          {/* Header Title Sidebar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'var(--primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF'
+              }}>
+                <ShieldCheck size={18} />
+              </div>
+              <div style={{ fontSize: '15.5px', fontWeight: '800', letterSpacing: '-0.2px' }}>
+                Admin Panel
+              </div>
+            </div>
+
+            {/* Mobile close button */}
+            <button
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="admin-mobile-close"
+              style={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                padding: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={20} />
+            </button>
           </div>
-        </div>
 
-        <div className="card" style={{ padding: '16px 20px', borderLeft: '4px solid var(--primary)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Masakan Anak Kos</div>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>
-            {recipes.filter(r => r.is_kos_friendly).length} <span style={{ fontSize: '13px', fontWeight: '500' }}>Menu</span>
+          {/* Search Box di Atas Sidebar */}
+          <div style={{ position: 'relative', width: '100%' }}>
+            <Search 
+              size={15} 
+              color="rgba(255, 255, 255, 0.45)" 
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} 
+            />
+            <input
+              type="text"
+              placeholder="Cari menu / data..."
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '9px 12px 9px 34px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '10px',
+                color: '#FFFFFF',
+                fontSize: '13px',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
+            />
           </div>
-        </div>
 
-        <div className="card" style={{ padding: '16px 20px', borderLeft: '4px solid var(--amber)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Menu Populer</div>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--amber)', marginTop: '2px' }}>
-            {recipes.filter(r => r.is_popular).length} <span style={{ fontSize: '13px', fontWeight: '500' }}>Menu</span>
-          </div>
-        </div>
+          {/* Menu Sections List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginTop: '4px' }}>
+            {sidebarSections.map((sec, sIdx) => {
+              // Filter items based on sidebar search input
+              const visibleItems = sec.items.filter(item => 
+                sidebarSearch.trim() === '' || item.label.toLowerCase().includes(sidebarSearch.toLowerCase())
+              );
 
-        <div className="card" style={{ padding: '16px 20px', borderLeft: '4px solid var(--sage)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Kategori Tersedia</div>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--sage)', marginTop: '2px' }}>
-            {categories.length} <span style={{ fontSize: '13px', fontWeight: '500' }}>Kategori</span>
-          </div>
-        </div>
-      </div>
+              if (visibleItems.length === 0) return null;
 
-      {/* 3. Search & Filter Bar */}
-      <div className="card" style={{
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px'
-      }}>
-        {/* Search Input */}
-        <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
-          <Search size={18} color="var(--text-light)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-          <input
-            type="text"
-            className="input-field"
-            placeholder="Cari menu berdasarkan nama masakan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: '42px', height: '44px', borderRadius: 'var(--radius-md)' }}
-          />
-        </div>
-
-        {/* Category Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>Kategori:</span>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 'var(--radius-md)',
-              border: '1.5px solid var(--border-subtle)',
-              fontSize: '13.5px',
-              fontWeight: '600',
-              color: 'var(--text-main)',
-              background: '#FFFFFF',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="semua">Semua Kategori ({recipes.length})</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 4. Recipe List Table / Cards */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-          <div className="skeleton" style={{ width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto 16px' }} />
-          <div style={{ fontWeight: '700' }}>Memuat data resep...</div>
-        </div>
-      ) : filteredRecipes.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: '50px 20px' }}>
-          <ChefHat size={40} color="var(--text-light)" style={{ margin: '0 auto 12px' }} />
-          <div style={{ fontSize: '16px', fontWeight: '800' }}>Tidak ada resep yang cocok</div>
-          <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Coba ganti kata kunci pencarian atau filter kategori Anda.
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {filteredRecipes.map((recipe) => {
-            const diffStyle = getDifficultyColor(recipe.difficulty);
-            return (
-              <div
-                key={recipe.id}
-                className="card"
-                style={{
-                  padding: '14px 18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '14px',
-                  transition: 'transform 0.15s ease'
-                }}
-              >
-                {/* Left: Thumbnail & Details */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: '260px', flex: 1 }}>
-                  {/* Photo Thumbnail */}
+              return (
+                <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {/* Group Header */}
                   <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    backgroundColor: '#F0ECE4',
-                    flexShrink: 0,
-                    position: 'relative'
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    letterSpacing: '0.8px',
+                    textTransform: 'uppercase',
+                    padding: '0 8px',
+                    userSelect: 'none'
                   }}>
-                    <img
-                      src={recipe.image_url}
-                      alt={recipe.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
-                      }}
-                    />
+                    {sec.title}
                   </div>
 
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '3px' }}>
-                      <span style={{
-                        fontSize: '10.5px',
-                        fontWeight: '700',
-                        color: 'var(--purple-dark)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.4px'
-                      }}>
-                        {recipe.category?.name || recipe.category_id}
-                      </span>
-                      <span className="badge" style={{ fontSize: '10px', padding: '2px 6px', background: diffStyle.bg, color: diffStyle.text }}>
-                        {recipe.difficulty}
-                      </span>
-                      {recipe.is_kos_friendly && (
-                        <span className="badge" style={{ fontSize: '10px', padding: '2px 6px', background: 'var(--amber-light)', color: 'var(--amber)' }}>
-                          Anak Kos
-                        </span>
-                      )}
-                      {recipe.is_popular && (
-                        <span className="badge" style={{ fontSize: '10px', padding: '2px 6px', background: 'var(--primary-light)', color: 'var(--primary)' }}>
-                          Populer
-                        </span>
-                      )}
-                    </div>
+                  {/* Menu Items */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {visibleItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
 
-                    <h3 style={{ fontSize: '15.5px', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1.25 }}>
-                      {recipe.name}
-                    </h3>
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleSidebarItemClick(item)}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '10px',
+                            padding: '8px 10px',
+                            borderRadius: '10px',
+                            background: isActive ? 'rgba(255, 255, 255, 0.14)' : 'transparent',
+                            color: '#FFFFFF',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.07)';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) e.currentTarget.style.background = 'transparent';
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* Colorful Solid Icon Box */}
+                            <div style={{
+                              width: '30px',
+                              height: '30px',
+                              borderRadius: '8px',
+                              background: item.iconBg,
+                              color: '#FFFFFF',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              <Icon size={16} strokeWidth={2.2} />
+                            </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      <span style={{ fontWeight: '700', color: 'var(--primary)' }}>
-                        {formatRupiah(recipe.estimated_cost)}
-                      </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        <Clock size={12} /> {formatTime(recipe.cooking_time)}
-                      </span>
-                      <span>{recipe.servings} Porsi</span>
-                    </div>
+                            <span style={{
+                              fontSize: '13.5px',
+                              fontWeight: isActive ? '700' : '500',
+                              color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.88)'
+                            }}>
+                              {item.label}
+                            </span>
+                          </div>
+
+                          {/* Badge Count if available */}
+                          {item.badge !== undefined && (
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              padding: '2px 7px',
+                              borderRadius: '999px',
+                              background: isActive ? 'var(--primary)' : 'rgba(255, 255, 255, 0.12)',
+                              color: '#FFFFFF'
+                            }}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </aside>
 
-                {/* Right: Action Buttons */}
+        {/* ==================================================== */}
+        {/* 2. MAIN CONTENT AREA DI SEBELAH KANAN SIDEBAR       */}
+        {/* ==================================================== */}
+        <main className="admin-main-content">
+          {/* TAB 1: ALL RECIPES, KOS RECIPES, OR POPULAR RECIPES */}
+          {['all', 'kos', 'popular'].includes(activeTab) && (
+            <>
+              {/* Header Box */}
+              <div style={{
+                background: 'var(--purple-dark)',
+                color: '#FFFFFF',
+                padding: '22px 24px',
+                borderRadius: 'var(--radius-xl)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '14px',
+                boxShadow: 'var(--shadow-purple)'
+              }}>
+                <div>
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: 'var(--amber)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.6px',
+                    marginBottom: '4px'
+                  }}>
+                    {activeTab === 'kos' ? 'Kategori Khusus' : activeTab === 'popular' ? 'Favorit Pengguna' : 'Kelola Resep'}
+                  </div>
+                  <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#FFF' }}>
+                    {activeTab === 'kos' ? 'Resep Masakan Anak Kos' : 
+                     activeTab === 'popular' ? 'Resep Masakan Populer' : 'Daftar Seluruh Menu Masakan'}
+                  </h1>
+                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.85)', marginTop: '2px' }}>
+                    Menampilkan {filteredRecipes.length} resep masakan aktif di aplikasi QuickPrep.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleOpenAddModal}
+                  style={{
+                    background: 'var(--primary)',
+                    color: '#FFFFFF',
+                    padding: '10px 20px',
+                    borderRadius: '999px',
+                    fontWeight: '700',
+                    fontSize: '13.5px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-warm)'
+                  }}
+                >
+                  <Plus size={16} strokeWidth={2.5} />
+                  <span>Tambah Resep Baru</span>
+                </button>
+              </div>
+
+              {/* Search & Filter Bar */}
+              <div className="card" style={{
+                padding: '14px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
+                  <Search size={16} color="var(--text-light)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="Cari nama menu masakan..."
+                    value={recipeSearch}
+                    onChange={(e) => setRecipeSearch(e.target.value)}
+                    style={{ paddingLeft: '38px', height: '40px', fontSize: '13.5px', borderRadius: 'var(--radius-md)' }}
+                  />
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    onClick={() => handleOpenEditModal(recipe)}
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-muted)', fontWeight: '600' }}>Kategori:</span>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      background: 'var(--purple-dark)',
-                      color: '#FFFFFF',
-                      padding: '8px 16px',
+                      padding: '8px 12px',
                       borderRadius: 'var(--radius-md)',
+                      border: '1.5px solid var(--border-subtle)',
                       fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
+                      fontWeight: '600',
+                      color: 'var(--text-main)',
+                      background: '#FFFFFF',
+                      outline: 'none',
+                      cursor: 'pointer'
                     }}
                   >
-                    <Edit3 size={15} />
-                    <span>Edit</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteRecipe(recipe)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      background: 'var(--alert-red-light)',
-                      color: 'var(--alert-red)',
-                      padding: '8px 14px',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: '13px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      border: '1px solid #FECACA',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <Trash2 size={15} />
-                    <span>Hapus</span>
-                  </button>
+                    <option value="semua">Semua ({recipes.length})</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
 
-      {/* 5. MODAL FORM: TAMBAH / EDIT RESEP */}
+              {/* Recipe Cards List */}
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--text-muted)' }}>
+                  <div className="skeleton" style={{ width: '60px', height: '60px', borderRadius: '50%', margin: '0 auto 12px' }} />
+                  <div style={{ fontWeight: '700' }}>Memuat daftar resep...</div>
+                </div>
+              ) : filteredRecipes.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                  <ChefHat size={36} color="var(--text-light)" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: '15.5px', fontWeight: '800' }}>Tidak ada resep yang sesuai</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Coba ubah kata kunci pencarian atau kategori.
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {filteredRecipes.map((recipe) => {
+                    const diffStyle = getDifficultyColor(recipe.difficulty);
+                    return (
+                      <div
+                        key={recipe.id}
+                        className="card"
+                        style={{
+                          padding: '12px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '12px'
+                        }}
+                      >
+                        {/* Thumbnail & Title */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '240px' }}>
+                          <div style={{
+                            width: '58px',
+                            height: '58px',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            backgroundColor: '#F0ECE4',
+                            flexShrink: 0
+                          }}>
+                            <img
+                              src={recipe.image_url}
+                              alt={recipe.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                              <span style={{
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                color: 'var(--purple-dark)',
+                                textTransform: 'uppercase'
+                              }}>
+                                {recipe.category?.name || recipe.category_id}
+                              </span>
+                              <span className="badge" style={{ fontSize: '9.5px', padding: '2px 5px', background: diffStyle.bg, color: diffStyle.text }}>
+                                {recipe.difficulty}
+                              </span>
+                              {recipe.is_kos_friendly && (
+                                <span className="badge" style={{ fontSize: '9.5px', padding: '2px 5px', background: 'var(--amber-light)', color: 'var(--amber)' }}>
+                                  Anak Kos
+                                </span>
+                              )}
+                              {recipe.is_popular && (
+                                <span className="badge" style={{ fontSize: '9.5px', padding: '2px 5px', background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                                  Populer
+                                </span>
+                              )}
+                            </div>
+
+                            <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1.25 }}>
+                              {recipe.name}
+                            </h3>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '3px' }}>
+                              <span style={{ fontWeight: '700', color: 'var(--primary)' }}>
+                                {formatRupiah(recipe.estimated_cost)}
+                              </span>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                <Clock size={11} /> {formatTime(recipe.cooking_time)}
+                              </span>
+                              <span>{recipe.servings} Porsi</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <button
+                            onClick={() => handleOpenEditModal(recipe)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: 'var(--purple-dark)',
+                              color: '#FFFFFF',
+                              padding: '7px 14px',
+                              borderRadius: 'var(--radius-md)',
+                              fontSize: '12.5px',
+                              fontWeight: '700',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <Edit3 size={14} />
+                            <span>Edit</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteRecipe(recipe)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: 'var(--alert-red-light)',
+                              color: 'var(--alert-red)',
+                              padding: '7px 12px',
+                              borderRadius: 'var(--radius-md)',
+                              fontSize: '12.5px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              border: '1px solid #FECACA'
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            <span>Hapus</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* TAB 2: DATA KATEGORI */}
+          {activeTab === 'categories' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
+                  Data Master Kategori Masakan
+                </h2>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Daftar seluruh kelompok hidangan yang digunakan untuk klasifikasi menu.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                {categories.map((cat) => {
+                  const countInCat = recipes.filter(r => r.category_id === cat.id || r.category?.id === cat.id).length;
+                  return (
+                    <div key={cat.id} className="card" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>{cat.name}</span>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          background: 'var(--purple-light)',
+                          color: 'var(--purple-main)',
+                          padding: '2px 8px',
+                          borderRadius: '999px'
+                        }}>
+                          {countInCat} Resep
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>{cat.description}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: DATA ALAT MASAK */}
+          {activeTab === 'tools' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
+                  Data Peralatan Masak
+                </h2>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Peralatan yang digunakan pada fitur "Cook with My Tools".
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                {toolsList.map((tool) => (
+                  <div key={tool.id} className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '10px',
+                      background: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Wrench size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>{tool.name}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '1px' }}>ID: <code>{tool.id}</code></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: DATA SUBSTITUSI BAHAN */}
+          {activeTab === 'substitutions' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="card" style={{ padding: '20px 24px', background: 'var(--bg-card-warm)' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)' }}>
+                  Data Substitusi Bahan (Missing Ingredients)
+                </h2>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Rekomendasi alternatif bumbu ketika bahan tertentu habis di kosan.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {substitutionsList.map((sub) => (
+                  <div key={sub.id} className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>
+                        {sub.original_ingredient}
+                      </span>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>digantikan oleh</span>
+                      <span style={{
+                        fontSize: '13px',
+                        fontWeight: '700',
+                        color: 'var(--primary)',
+                        background: 'var(--primary-light)',
+                        padding: '2px 8px',
+                        borderRadius: '999px'
+                      }}>
+                        {sub.substitute_ingredient}
+                      </span>
+                      <span style={{ fontSize: '12px', color: 'var(--sage)', fontWeight: '600' }}>
+                        (Rasio: {sub.ratio})
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                      <strong>Catatan Rasa:</strong> {sub.notes}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: SISTEM & DATABASE STATUS */}
+          {activeTab === 'system' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="card" style={{ padding: '24px', background: 'var(--bg-card-warm)' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--purple-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Database size={22} color="var(--primary)" />
+                  <span>Status Sistem & Database Supabase</span>
+                </h2>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Informasi konektivitas REST API Express dan Supabase PostgreSQL.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                    <CheckCircle2 size={18} color="var(--success-green)" />
+                    <span><strong>Database Supabase:</strong> Terhubung Aktif (8 Tabel Relasional)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                    <CheckCircle2 size={18} color="var(--success-green)" />
+                    <span><strong>Project Ref:</strong> <code>dnhlngwxepicvugxbeee</code></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                    <CheckCircle2 size={18} color="var(--success-green)" />
+                    <span><strong>CRUD Endpoints:</strong> POST, PUT, DELETE /api/recipes Siap Pakai</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                    <CheckCircle2 size={18} color="var(--success-green)" />
+                    <span><strong>PWA Offline Cache:</strong> Service Worker Siap Cache File Lokal <code>/recipes/</code></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ==================================================== */}
+      {/* 3. MODAL FORM: TAMBAH / EDIT RESEP                   */}
+      {/* ==================================================== */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div
@@ -967,6 +1416,45 @@ export const AdminPage = () => {
           </div>
         </div>
       )}
+
+      {/* Responsive Styles for Sidebar */}
+      <style>{`
+        .admin-mobile-close {
+          display: none;
+        }
+        .admin-sidebar-mobile-toggle {
+          display: none;
+        }
+        @media (max-width: 960px) {
+          .admin-sidebar-mobile-toggle {
+            display: inline-flex;
+          }
+          .admin-mobile-close {
+            display: block;
+          }
+          .admin-sidebar {
+            display: none;
+          }
+          .admin-sidebar.open {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 290px;
+            max-width: 85vw;
+            z-index: 1001;
+            border-radius: 0 20px 20px 0;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+            animation: slideInLeft 0.25s ease;
+          }
+        }
+        @keyframes slideInLeft {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 };
