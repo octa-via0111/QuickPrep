@@ -155,7 +155,7 @@ export const BottomNav = () => {
       })}
 
       <style>{`
-        @media (min-width: 821px) {
+        @media (min-width: 861px) {
           .mobile-bottom-nav {
             display: none !important;
           }

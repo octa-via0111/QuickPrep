@@ -81,17 +81,17 @@ export const Navbar = () => {
       width: '100%',
       transition: 'background-color 0.25s ease, border-color 0.25s ease'
     }}>
-      <div style={{
+      <div className="navbar-container" style={{
         maxWidth: '1120px',
         margin: '0 auto',
         padding: '12px 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '16px'
+        gap: '12px'
       }}>
         {/* Brand Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
           <div style={{
             width: '40px',
             height: '40px',
@@ -113,14 +113,16 @@ export const Navbar = () => {
               fontWeight: '800',
               letterSpacing: '-0.4px',
               color: 'var(--text-main)',
-              lineHeight: 1.1
+              lineHeight: 1.1,
+              whiteSpace: 'nowrap'
             }}>
               Quick<span style={{ color: 'var(--primary)' }}>Prep</span>
             </div>
-            <div style={{
+            <div className="brand-tagline" style={{
               fontSize: '10.5px',
               color: 'var(--text-muted)',
-              fontWeight: '500'
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
             }}>
               Cook what you have. Spend what you can.
             </div>
@@ -168,7 +170,7 @@ export const Navbar = () => {
         </nav>
 
         {/* Right Action: Menu Masuk / Profil User & PWA Install & Theme Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="navbar-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {/* Tombol Night Mode / Dark Theme */}
           <button
             onClick={toggleTheme}
@@ -412,8 +414,9 @@ export const Navbar = () => {
                 }
               }}
               title="Download / Instal Aplikasi QuickPrep"
+              className="install-app-btn"
               style={{
-                padding: '7px 15px',
+                padding: '7px 14px',
                 borderRadius: '999px',
                 fontSize: '13px',
                 fontWeight: '700',
@@ -421,14 +424,16 @@ export const Navbar = () => {
                 color: '#FFFFFF',
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px',
                 cursor: 'pointer',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 boxShadow: '0 4px 12px rgba(38, 15, 61, 0.25)',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                flexShrink: 0
               }}
             >
-              <Download size={14} />
+              <Download size={15} />
               <span className="install-label">Download App</span>
             </button>
           )}
@@ -443,12 +448,31 @@ export const Navbar = () => {
       />
 
       <style>{`
-        @media (max-width: 820px) {
+        @media (max-width: 860px) {
           .desktop-nav {
             display: none !important;
           }
           .install-label {
-            display: none;
+            display: none !important;
+          }
+          .install-app-btn {
+            width: 36px !important;
+            height: 36px !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            justify-content: center !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .navbar-container {
+            padding: 10px 12px !important;
+            gap: 8px !important;
+          }
+          .brand-tagline {
+            display: none !important;
+          }
+          .navbar-right-actions {
+            gap: 6px !important;
           }
         }
       `}</style>
