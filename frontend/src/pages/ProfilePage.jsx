@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, 
   Settings, 
@@ -39,6 +39,7 @@ import { promptPWAInstall, subscribeToInstallPrompt } from '../utils/pwa.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import InstallAppModal from '../components/InstallAppModal.jsx';
+import { goBackOneStep } from '../utils/navigation.js';
 
 const AVATAR_THEMES = [
   { color: '#260F3D', label: 'Ungu Gelap' },
@@ -189,13 +190,10 @@ export const ProfilePage = () => {
   };
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    goBackOneStep(navigate, location.pathname);
   };
 
   const userInitial = (profile.name || currentUser?.name || 'U').trim().charAt(0).toUpperCase();

@@ -1,21 +1,19 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Heart, Utensils, ArrowRight, ChevronLeft } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import RecipeCard from '../components/RecipeCard.jsx';
+import { goBackOneStep } from '../utils/navigation.js';
 
 export const FavoritesPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { favoriteIds } = useFavorites();
   const { recipes, loading } = useRecipes();
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    goBackOneStep(navigate, location.pathname);
   };
 
   // Filter recipes matching favorite IDs

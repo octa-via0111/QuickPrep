@@ -21,6 +21,7 @@ import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import CookingTimer from '../components/CookingTimer.jsx';
 import historyService from '../services/historyService.js';
 import { addStoredHistory } from '../utils/storage.js';
+import { goBackOneStep } from '../utils/navigation.js';
 
 export const CookingModePage = () => {
   const { id } = useParams();
@@ -259,13 +260,30 @@ export const CookingModePage = () => {
               </div>
             )}
 
-            <button
-              onClick={() => navigate('/', { replace: true })}
-              className="btn-secondary"
-              style={{ padding: '12px', fontSize: '14px' }}
-            >
-              Kembali ke Halaman Utama
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={() => {
+                  if (recipe?.id) {
+                    navigate(`/recipe/${recipe.id}`);
+                  } else {
+                    goBackOneStep(navigate, location.pathname);
+                  }
+                }}
+                className="btn-primary"
+                style={{ padding: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <span>Lihat Detail Resep</span>
+                <ArrowRight size={16} />
+              </button>
+
+              <button
+                onClick={() => navigate('/')}
+                className="btn-secondary"
+                style={{ padding: '12px', fontSize: '14px' }}
+              >
+                Kembali ke Beranda
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -292,7 +310,13 @@ export const CookingModePage = () => {
         padding: '12px 0'
       }}>
         <button
-          onClick={() => navigate(`/recipe/${recipe.id}`, { replace: true })}
+          onClick={() => {
+            if (recipe?.id) {
+              navigate(`/recipe/${recipe.id}`);
+            } else {
+              goBackOneStep(navigate, location.pathname);
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',

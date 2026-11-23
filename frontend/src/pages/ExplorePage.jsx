@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -16,17 +16,15 @@ import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 import toolService from '../services/toolService.js';
+import { goBackOneStep } from '../utils/navigation.js';
 
 export const ExplorePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    goBackOneStep(navigate, location.pathname);
   };
 
   // Filters state initialized from URL search params

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Disc3, SlidersHorizontal, RotateCw, Filter, Check, ChevronLeft } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
 import toolService from '../services/toolService.js';
 import SpinWheel from '../components/SpinWheel.jsx';
 import { formatRupiah } from '../utils/formatter.js';
+import { goBackOneStep } from '../utils/navigation.js';
 
 export const SpinPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [category, setCategory] = useState('semua');
   const [maxBudget, setMaxBudget] = useState('');
   const [tool, setTool] = useState('semua');
@@ -16,11 +18,7 @@ export const SpinPage = () => {
   const [toolsList, setToolsList] = useState([]);
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    goBackOneStep(navigate, location.pathname);
   };
 
   const { categories } = useCategories();

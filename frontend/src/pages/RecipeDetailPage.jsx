@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Clock, 
   Wallet, 
@@ -26,10 +26,12 @@ import { useFavorites } from '../hooks/useFavorites.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import SubstitutionModal from '../components/SubstitutionModal.jsx';
+import { goBackOneStep } from '../utils/navigation.js';
 
 export const RecipeDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { recipe, loading, error } = useRecipeDetail(id);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAdmin } = useAuth();
@@ -182,13 +184,7 @@ export const RecipeDetailPage = () => {
       {/* Back button & Action Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button
-          onClick={() => {
-            if (window.history.state && window.history.state.idx > 0) {
-              navigate(-1);
-            } else {
-              navigate('/explore');
-            }
-          }}
+          onClick={() => goBackOneStep(navigate, location.pathname)}
           style={{
             display: 'inline-flex',
             alignItems: 'center',

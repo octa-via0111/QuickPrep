@@ -1,25 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Wallet, Info, ArrowRight, Check, Filter, ChevronLeft } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 import { formatRupiah } from '../utils/formatter.js';
+import { goBackOneStep } from '../utils/navigation.js';
 
 const BUDGET_PRESETS = [5000, 10000, 15000, 20000, 25000];
 
 export const BudgetPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const urlBudget = Number(searchParams.get('maxBudget')) || Number(searchParams.get('max_budget'));
   const [selectedBudget, setSelectedBudget] = useState(urlBudget || 15000);
   const [customInput, setCustomInput] = useState(urlBudget && !BUDGET_PRESETS.includes(urlBudget) ? String(urlBudget) : '');
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    goBackOneStep(navigate, location.pathname);
   };
 
   // Fetch filtered recipes strictly <= selectedBudget from API

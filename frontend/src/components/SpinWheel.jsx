@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { Disc3, RotateCw, ArrowRight, Utensils, Clock, CheckCircle } from 'lucide-react';
 import { formatRupiah, formatTime } from '../utils/formatter.js';
@@ -287,14 +288,14 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
-            <a
-              href={`/recipe/${winner.id}`}
+            <Link
+              to={`/recipe/${winner.id}`}
               className="btn-primary"
-              style={{ flex: 1, padding: '10px 16px', fontSize: '14px' }}
+              style={{ flex: 1, padding: '10px 16px', fontSize: '14px', textDecoration: 'none' }}
             >
               <span>Lihat Detail Resep</span>
               <ArrowRight size={16} />
-            </a>
+            </Link>
             <button
               onClick={handleSpin}
               className="btn-secondary"

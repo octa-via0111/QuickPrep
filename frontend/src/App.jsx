@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PWAInstallBanner from './components/PWAInstallBanner.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { trackNavigation } from './utils/navigation.js';
 
 import HomePage from './pages/HomePage.jsx';
 import ExplorePage from './pages/ExplorePage.jsx';
@@ -20,6 +21,13 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 
 function App() {
+  const location = useLocation();
+
+  // Otomatis lacak riwayat halaman agar tombol kembali selalu tepat 1 langkah ke belakang
+  useEffect(() => {
+    trackNavigation(location.pathname + (location.search || ''));
+  }, [location.pathname, location.search]);
+
   return (
     <ThemeProvider>
       <AuthProvider>

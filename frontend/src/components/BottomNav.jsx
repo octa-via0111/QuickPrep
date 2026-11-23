@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Compass, 
@@ -10,7 +10,14 @@ import {
 import { useFavorites } from '../hooks/useFavorites.js';
 
 export const BottomNav = () => {
+  const location = useLocation();
   const { count: favoriteCount } = useFavorites();
+
+  // Sembunyikan bottom navigation saat pengguna berada di Mode Memasak
+  // agar tombol Langkah Sebelumnya & Langkah Selanjutnya tidak tertutup
+  if (location.pathname.startsWith('/cook/')) {
+    return null;
+  }
 
   const navItems = [
     { to: '/', label: 'Home', icon: Home },
@@ -56,7 +63,6 @@ export const BottomNav = () => {
             key={item.to}
             to={item.to}
             end={item.to === '/'}
-            replace
             className="bottom-nav-link"
             style={({ isActive }) => ({
               flex: 1,
