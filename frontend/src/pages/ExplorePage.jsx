@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
@@ -9,7 +9,8 @@ import {
   Utensils, 
   RotateCcw,
   Globe,
-  ExternalLink
+  ExternalLink,
+  ChevronLeft
 } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
@@ -17,7 +18,16 @@ import RecipeCard from '../components/RecipeCard.jsx';
 import toolService from '../services/toolService.js';
 
 export const ExplorePage = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   // Filters state initialized from URL search params
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -71,11 +81,33 @@ export const ExplorePage = () => {
     setMaxCookingTime('');
     setDifficulty('semua');
     setSort('popular');
-    setSearchParams({});
+    setSearchParams({}, { replace: true });
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Back button */}
+      <div>
+        <button
+          onClick={handleBack}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '13.5px',
+            fontWeight: '600',
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+        >
+          <ChevronLeft size={18} />
+          <span>Kembali</span>
+        </button>
+      </div>
+
       {/* Page Title & Search Header */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: '800', marginBottom: '6px' }}>

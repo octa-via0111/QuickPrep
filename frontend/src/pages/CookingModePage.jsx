@@ -260,7 +260,7 @@ export const CookingModePage = () => {
             )}
 
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/', { replace: true })}
               className="btn-secondary"
               style={{ padding: '12px', fontSize: '14px' }}
             >
@@ -292,7 +292,7 @@ export const CookingModePage = () => {
         padding: '12px 0'
       }}>
         <button
-          onClick={() => navigate(`/recipe/${recipe.id}`)}
+          onClick={() => navigate(`/recipe/${recipe.id}`, { replace: true })}
           style={{
             display: 'flex',
             alignItems: 'center',

@@ -56,6 +56,7 @@ export const BottomNav = () => {
             key={item.to}
             to={item.to}
             end={item.to === '/'}
+            replace
             className="bottom-nav-link"
             style={({ isActive }) => ({
               flex: 1,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Settings, 
@@ -8,23 +8,24 @@ import {
   History, 
   Check, 
   Disc3, 
-  Info,
-  Clock,
-  Star,
-  Download,
-  Trash2,
-  UtensilsCrossed,
-  ShieldCheck,
-  Layers,
-  ChefHat,
-  CheckSquare,
-  Square,
-  Mail,
-  BadgeCheck,
-  Sun,
-  Moon,
-  Camera,
-  UploadCloud
+  Info, 
+  Clock, 
+  Star, 
+  Download, 
+  Trash2, 
+  UtensilsCrossed, 
+  ShieldCheck, 
+  Layers, 
+  ChefHat, 
+  CheckSquare, 
+  Square, 
+  Mail, 
+  BadgeCheck, 
+  Sun, 
+  Moon, 
+  Camera, 
+  UploadCloud,
+  ChevronLeft
 } from 'lucide-react';
 import { 
   getStoredProfile, 
@@ -187,11 +188,43 @@ export const ProfilePage = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   const userInitial = (profile.name || currentUser?.name || 'U').trim().charAt(0).toUpperCase();
   const userColor = profile.avatarColor || '#E0623A';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '760px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '760px', margin: '0 auto' }}>
+      {/* Back button */}
+      <div>
+        <button
+          onClick={handleBack}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '13.5px',
+            fontWeight: '600',
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+        >
+          <ChevronLeft size={18} />
+          <span>Kembali</span>
+        </button>
+      </div>
+
       {/* 1. Page Title Header */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: '800', marginBottom: '6px' }}>

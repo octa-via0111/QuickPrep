@@ -182,14 +182,24 @@ export const RecipeDetailPage = () => {
       {/* Back button & Action Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.state && window.history.state.idx > 0) {
+              navigate(-1);
+            } else {
+              navigate('/explore');
+            }
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
             fontSize: '13.5px',
             fontWeight: '600',
-            color: 'var(--text-muted)'
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
           }}
         >
           <ChevronLeft size={18} />

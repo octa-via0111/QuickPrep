@@ -1,19 +1,50 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, Utensils, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Heart, Utensils, ArrowRight, ChevronLeft } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 
 export const FavoritesPage = () => {
+  const navigate = useNavigate();
   const { favoriteIds } = useFavorites();
   const { recipes, loading } = useRecipes();
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   // Filter recipes matching favorite IDs
   const favoriteRecipes = recipes.filter(r => favoriteIds.includes(r.id));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Back button */}
+      <div>
+        <button
+          onClick={handleBack}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '13.5px',
+            fontWeight: '600',
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+        >
+          <ChevronLeft size={18} />
+          <span>Kembali</span>
+        </button>
+      </div>
+
       {/* Header */}
       <div>
         <div style={{

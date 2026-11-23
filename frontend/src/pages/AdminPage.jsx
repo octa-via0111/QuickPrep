@@ -614,6 +614,27 @@ export const AdminPage = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
+            onClick={() => navigate('/')}
+            title="Kembali ke Beranda Aplikasi"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 16px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-main)',
+              fontSize: '13px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            <ArrowLeft size={15} />
+            <span>Ke Beranda</span>
+          </button>
+
+          <button
             onClick={() => {
               if (window.confirm('Apakah Anda yakin ingin keluar dari sesi Admin?')) {
                 handleLogout();

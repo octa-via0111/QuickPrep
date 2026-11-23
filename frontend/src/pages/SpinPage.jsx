@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Disc3, SlidersHorizontal, RotateCw, Filter, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Disc3, SlidersHorizontal, RotateCw, Filter, Check, ChevronLeft } from 'lucide-react';
 import useRecipes from '../hooks/useRecipes.js';
 import useCategories from '../hooks/useCategories.js';
 import toolService from '../services/toolService.js';
@@ -7,11 +8,20 @@ import SpinWheel from '../components/SpinWheel.jsx';
 import { formatRupiah } from '../utils/formatter.js';
 
 export const SpinPage = () => {
+  const navigate = useNavigate();
   const [category, setCategory] = useState('semua');
   const [maxBudget, setMaxBudget] = useState('');
   const [tool, setTool] = useState('semua');
   const [maxCookingTime, setMaxCookingTime] = useState('');
   const [toolsList, setToolsList] = useState([]);
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   const { categories } = useCategories();
 
@@ -32,7 +42,29 @@ export const SpinPage = () => {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
+      {/* Back button */}
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
+        <button
+          onClick={handleBack}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '13.5px',
+            fontWeight: '600',
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0
+          }}
+        >
+          <ChevronLeft size={18} />
+          <span>Kembali</span>
+        </button>
+      </div>
+
       {/* Title */}
       <div style={{ textAlign: 'center', maxWidth: '540px' }}>
         <div style={{
