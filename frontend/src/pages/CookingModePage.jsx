@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { 
   Play, 
@@ -12,6 +12,7 @@ import {
   Star,
   Award,
   ArrowRight,
+  ArrowLeft,
   X,
   ChefHat,
   RefreshCw,
@@ -27,12 +28,12 @@ export const CookingModePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { recipe, loading } = useRecipeDetail(id);
 
   // Ambil data bahan pengganti jika ada yang dipilih dari RecipeDetailPage
   const appliedSubstitutions = location.state?.appliedSubstitutions || {};
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [rating, setRating] = useState(5);
   const [cookingNotes, setCookingNotes] = useState('');
@@ -94,12 +95,26 @@ export const CookingModePage = () => {
     });
   }, [recipe, appliedSubstitutions]);
 
-  const currentStep = steps[currentStepIndex];
   const totalSteps = steps.length;
+
+  // Baca langkah saat ini langsung dari searchParams (?step=1, ?step=2, dst)
+  // Ini memastikan back gesture bawaan HP / swipe kembali per langkah, tidak mental ke awal
+  const stepQuery = parseInt(searchParams.get('step') || '1', 10);
+  const targetStepIndex = !isNaN(stepQuery) && stepQuery >= 1 ? stepQuery - 1 : 0;
+  const currentStepIndex = totalSteps > 0 ? Math.min(Math.max(0, targetStepIndex), totalSteps - 1) : targetStepIndex;
+  const currentStep = steps[currentStepIndex];
+
+  // Tutup layar selesai jika pengguna menekan back / mundur ke langkah memasak
+  useEffect(() => {
+    if (completed) {
+      setCompleted(false);
+    }
+  }, [searchParams]);
 
   const handleNextStep = () => {
     if (currentStepIndex < totalSteps - 1) {
-      setCurrentStepIndex(prev => prev + 1);
+      const nextStepNumber = currentStepIndex + 2; // e.g. index 0 (Langkah 1) -> Langkah 2
+      navigate(`/cook/${id}?step=${nextStepNumber}`, { state: location.state });
     } else {
       // Selesai semua langkah memasak!
       setCompleted(true);
@@ -114,8 +129,60 @@ export const CookingModePage = () => {
   };
 
   const handlePrevStep = () => {
+    if (completed) {
+      setCompleted(false);
+      return;
+    }
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
+      // Jika browser memiliki history langkah sebelumnya, gunakan navigate(-1) agar selaras dengan swipe back HP
+      if (window.history.state && window.history.state.idx > 0) {
+        navigate(-1);
+      } else {
+        const prevStepNumber = currentStepIndex; // e.g. currentStepIndex 3 (Langkah 4) -> Langkah 3
+        navigate(`/cook/${id}?step=${prevStepNumber}`, { state: location.state });
+      }
+    }
+  };
+
+  // --- DETEKSI GESTUR SENTUH / SWIPE HORIZONTAL (LAYAR HP) ---
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+  };
+
+  const handleTouchMove = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = () => {
+    const diffX = touchEndX.current - touchStartX.current;
+    const diffY = touchEndY.current - touchStartY.current;
+    const elapsed = Date.now() - touchStartTime.current;
+
+    // Hanya picu jika swipe horizontal jelas:
+    // 1. Jarak horizontal minimal 40px
+    // 2. Horizontal jauh lebih dominan dibanding vertikal (tidak sedang scroll membaca resep)
+    // 3. Durasi swipe cepat di bawah 700ms
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.3 && elapsed < 700) {
+      if (diffX > 0) {
+        // Geser ke kanan (kiri -> kanan) = Langkah Sebelumnya
+        handlePrevStep();
+      } else {
+        // Geser ke kiri (kanan -> kiri) = Langkah Selanjutnya
+        handleNextStep();
+      }
     }
   };
 
@@ -262,6 +329,15 @@ export const CookingModePage = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
+                onClick={() => setCompleted(false)}
+                className="btn-secondary"
+                style={{ padding: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <ArrowLeft size={16} />
+                <span>Lihat Kembali Langkah Memasak</span>
+              </button>
+
+              <button
                 onClick={() => {
                   if (recipe?.id) {
                     navigate(`/recipe/${recipe.id}`);
@@ -376,12 +452,20 @@ export const CookingModePage = () => {
         }} />
       </div>
 
-      {/* Card Instruksi Langkah Utama */}
-      <div className="card" style={{
-        padding: '24px',
-        background: 'var(--bg-card-warm)',
-        border: '1.5px solid var(--border-subtle)'
-      }}>
+      {/* Card Instruksi Langkah Utama dengan Dukungan Geser / Swipe */}
+      <div 
+        className="card" 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          padding: '24px',
+          background: 'var(--bg-card-warm)',
+          border: '1.5px solid var(--border-subtle)',
+          touchAction: 'pan-y',
+          position: 'relative'
+        }}
+      >
         {/* Step Badge & Tombol Timer */}
         <div style={{
           display: 'flex',
@@ -482,6 +566,23 @@ export const CookingModePage = () => {
             />
           </div>
         )}
+      </div>
+
+      {/* Petunjuk Geser / Swipe untuk Pengguna HP */}
+      <div style={{
+        textAlign: 'center',
+        fontSize: '12px',
+        color: 'var(--text-muted)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        margin: '-6px 0 2px 0',
+        userSelect: 'none'
+      }}>
+        <span>👉 Geser kanan untuk kembali</span>
+        <span>•</span>
+        <span>Geser kiri untuk lanjut 👈</span>
       </div>
 
       {/* Bar Navigasi Langkah: Sebelum & Lanjut */}

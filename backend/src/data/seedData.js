@@ -1,4 +1,3 @@
-// Comprehensive Seed Data for QuickPrep
 // Berisi 26 Resep Praktis, Kategori, Alat Masak, Bahan, dan Substitusi
 
 export const categories = [

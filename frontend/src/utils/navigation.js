@@ -9,16 +9,22 @@ const NAV_STACK_KEY = 'quickprep_nav_history';
 export const trackNavigation = (fullPath) => {
   if (!fullPath) return;
   try {
+    let normalizedPath = fullPath;
+    // Pada mode memasak, jangan tumpuk ?step=2, ?step=3 di session page stack
+    if (fullPath.startsWith('/cook/')) {
+      normalizedPath = fullPath.split('?')[0];
+    }
+
     const raw = sessionStorage.getItem(NAV_STACK_KEY);
     let stack = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(stack)) stack = [];
 
     // Jika rute baru sama persis dengan rute terakhir di stack, abaikan
-    if (stack[stack.length - 1] === fullPath) {
+    if (stack[stack.length - 1] === normalizedPath) {
       return;
     }
 
-    stack.push(fullPath);
+    stack.push(normalizedPath);
     // Batasi maksimum 30 riwayat terakhir
     if (stack.length > 30) {
       stack.shift();
@@ -59,6 +65,10 @@ export const goBackOneStep = (navigate, currentPath = '') => {
       while (stack.length > 0) {
         const item = stack.pop();
         if (item && item !== currentPath) {
+          // Jika saat ini kita berada di /recipe/..., jangan kembali ke mode masak (/cook/...) yang baru saja ditutup
+          if (currentPath.startsWith('/recipe/') && item.startsWith('/cook/')) {
+            continue;
+          }
           target = item;
           break;
         }
@@ -74,7 +84,7 @@ export const goBackOneStep = (navigate, currentPath = '') => {
 
   // Fallback cerdas jika history stack kosong atau direct access
   if (currentPath.startsWith('/cook/')) {
-    const recipeId = currentPath.split('/')[2];
+    const recipeId = currentPath.split('/')[2]?.split('?')[0];
     if (recipeId) {
       navigate(`/recipe/${recipeId}`);
       return;
