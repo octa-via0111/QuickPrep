@@ -11,6 +11,7 @@ import {
   deleteRecipe
 } from '../controllers/recipeController.js';
 import { validateRecipeQuery } from '../middleware/validator.js';
+import { requireAdmin } from '../middleware/authMiddleware.js';
 import { isSupabaseConfigured, supabase } from '../config/supabase.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,8 +23,8 @@ router.get('/', validateRecipeQuery, getAllRecipes);
 router.get('/:id', getRecipeById);
 router.get('/:id/substitutions', getRecipeSubstitutions);
 
-// Upload Foto Resep Langsung ke Server & Supabase
-router.post('/upload-image', async (req, res, next) => {
+// Upload Foto Resep Langsung ke Server & Supabase (Khusus Administrator)
+router.post('/upload-image', requireAdmin, async (req, res, next) => {
   try {
     const { filename, base64Data } = req.body;
     if (!base64Data || !filename) {
@@ -95,9 +96,9 @@ router.post('/upload-image', async (req, res, next) => {
   }
 });
 
-// Admin / CRUD Routes
-router.post('/', createRecipe);
-router.put('/:id', updateRecipe);
-router.delete('/:id', deleteRecipe);
+// Admin / CRUD Routes (Dilindungi Autentikasi Administrator)
+router.post('/', requireAdmin, createRecipe);
+router.put('/:id', requireAdmin, updateRecipe);
+router.delete('/:id', requireAdmin, deleteRecipe);
 
 export default router;
