@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Heart, Users, ChefHat } from 'lucide-react';
+import { Clock, Heart, Users, ChefHat, Share2, Check } from 'lucide-react';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import { useFavorites } from '../hooks/useFavorites.js';
+import { shareRecipe } from '../utils/share.js';
 
 export const RecipeCard = ({ recipe }) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(recipe.id);
   const diffStyle = getDifficultyColor(recipe.difficulty);
+  const [shared, setShared] = useState(false);
 
   const handleFavoriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(recipe.id);
+  };
+
+  const handleShareClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const res = await shareRecipe(recipe);
+    if (res.success) {
+      setShared(true);
+      setTimeout(() => setShared(false), 2200);
+    }
   };
 
   return (
@@ -109,35 +121,71 @@ export const RecipeCard = ({ recipe }) => {
           )}
         </div>
 
-        {/* Favorite Button Top Right */}
-        <button
-          onClick={handleFavoriteClick}
-          aria-label={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-          style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            width: '30px',
-            height: '30px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.92)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-            transition: 'all 0.2s ease',
-            color: isFav ? 'var(--alert-red)' : 'var(--text-muted)'
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >
-          <Heart 
-            size={16} 
-            fill={isFav ? 'currentColor' : 'none'} 
-            strokeWidth={isFav ? 0 : 2.2} 
-          />
-        </button>
+        {/* Action Buttons Top Right: Favorit & Bagikan (Shopee-style) */}
+        <div style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          zIndex: 2
+        }}>
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteClick}
+            aria-label={isFav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.94)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: isFav ? 'var(--alert-red)' : 'var(--text-muted)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            <Heart 
+              size={16} 
+              fill={isFav ? 'currentColor' : 'none'} 
+              strokeWidth={isFav ? 0 : 2.2} 
+            />
+          </button>
+
+          {/* Share Button (seperti Shopee) */}
+          <button
+            onClick={handleShareClick}
+            aria-label="Bagikan link resep"
+            title="Bagikan Tautan Resep"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: shared ? 'var(--success-green)' : 'rgba(255, 255, 255, 0.94)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: shared ? '#FFFFFF' : 'var(--text-muted)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            {shared ? <Check size={15} /> : <Share2 size={15} />}
+          </button>
+        </div>
       </div>
 
       {/* Content Section */}

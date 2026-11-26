@@ -19,7 +19,10 @@ import {
   ExternalLink,
   Sparkles,
   Edit3,
-  Settings
+  Settings,
+  Check,
+  Copy,
+  WifiOff
 } from 'lucide-react';
 import useRecipeDetail from '../hooks/useRecipeDetail.js';
 import { useFavorites } from '../hooks/useFavorites.js';
@@ -27,14 +30,27 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import SubstitutionModal from '../components/SubstitutionModal.jsx';
 import { goBackOneStep } from '../utils/navigation.js';
+import { shareRecipe } from '../utils/share.js';
 
 export const RecipeDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { recipe, loading, error } = useRecipeDetail(id);
+  const { recipe, loading, error, isOfflineData } = useRecipeDetail(id);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAdmin } = useAuth();
+
+  // State notifikasi toast setelah klik Bagikan / Share
+  const [shareToast, setShareToast] = useState(null);
+
+  const handleShare = async () => {
+    if (!recipe) return;
+    const res = await shareRecipe(recipe);
+    if (res.success) {
+      setShareToast(res.message || 'Link resep berhasil disalin!');
+      setTimeout(() => setShareToast(null), 3500);
+    }
+  };
 
   // Serving Scaler state
   const [servings, setServings] = useState(1);
@@ -202,7 +218,28 @@ export const RecipeDetailPage = () => {
           <span>Kembali</span>
         </button>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Tombol Bagikan Resep (Share Link Konsep seperti Shopee) */}
+          <button
+            onClick={handleShare}
+            className="btn-secondary"
+            style={{
+              padding: '8px 14px',
+              fontSize: '13px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              color: shareToast ? 'var(--primary)' : 'var(--text-main)',
+              borderColor: shareToast ? 'var(--primary)' : undefined
+            }}
+            title="Bagikan Tautan Resep ke Teman"
+          >
+            {shareToast ? <Check size={16} color="var(--primary)" /> : <Share2 size={16} />}
+            <span>{shareToast ? 'Tersalin! ✓' : 'Bagikan'}</span>
+          </button>
+
+          {/* Tombol Favorit */}
           <button
             onClick={() => toggleFavorite(recipe.id)}
             className="btn-secondary"
@@ -217,6 +254,25 @@ export const RecipeDetailPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Indikator Status Offline jika data dimuat dari cache lokal */}
+      {isOfflineData && (
+        <div style={{
+          padding: '10px 14px',
+          background: 'var(--sage-light)',
+          borderLeft: '4px solid var(--sage)',
+          borderRadius: 'var(--radius-md)',
+          fontSize: '13px',
+          color: 'var(--sage-dark)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontWeight: '600'
+        }}>
+          <WifiOff size={16} />
+          <span>Mode Offline: Resep ini berhasil dimuat dari data yang tersimpan di perangkatmu (tetap dapat diakses tanpa kuota/internet).</span>
+        </div>
+      )}
 
       {/* Hero Food Image & Title Banner */}
       <section className="card" style={{ overflow: 'hidden', border: 'none' }}>
@@ -689,6 +745,32 @@ export const RecipeDetailPage = () => {
         substitutions={recipe.substitutions || []}
         onApplySubstitution={handleApplySubstitution}
       />
+
+      {/* Toast Notifikasi Berbagi Link Resep (Shopee-style Toast) */}
+      {shareToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '84px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#1E1B24',
+          color: '#FFFFFF',
+          padding: '12px 22px',
+          borderRadius: '999px',
+          fontSize: '13.5px',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          zIndex: 9999,
+          animation: 'fadeIn 0.25s ease',
+          pointerEvents: 'none'
+        }}>
+          <Check size={18} color="var(--success-green)" />
+          <span>{shareToast}</span>
+        </div>
+      )}
     </div>
   );
 };

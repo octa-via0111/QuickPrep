@@ -6,6 +6,12 @@ import {
   tools as seedTools, 
   substitutions as seedSubstitutions 
 } from '../data/seedData.js';
+import { 
+  saveOrUpdateCachedRecipe, 
+  saveOrUpdateCachedRecipes, 
+  getCachedRecipes, 
+  getCachedRecipeById 
+} from '../utils/storage.js';
 
 // Normalisasi URL gambar Supabase jika user menyalin link dashboard
 function normalizeImageUrl(url) {
@@ -97,6 +103,9 @@ export const recipeService = {
         if (budgetLimit && Array.isArray(resultData)) {
           resultData = resultData.filter(r => (Number(r.estimated_cost) || 0) <= Number(budgetLimit));
         }
+        if (Array.isArray(resultData) && resultData.length > 0) {
+          saveOrUpdateCachedRecipes(resultData);
+        }
         return { ...response, data: resultData, count: resultData?.length };
       }
     } catch (apiErr) {
@@ -173,6 +182,9 @@ export const recipeService = {
             formatted = formatted.filter(r => (Number(r.estimated_cost) || 0) <= Number(budgetLimit));
           }
 
+          // Simpan ke cache offline agar data yang pernah diakses bisa dibuka tanpa internet
+          saveOrUpdateCachedRecipes(formatted);
+
           return {
             success: true,
             count: formatted.length,
@@ -184,8 +196,11 @@ export const recipeService = {
       }
     }
 
-    // 3. Fallback: Data lokal seedData jika offline
-    let localData = seedRecipes.map(formatRecipeItem);
+    // 3. Fallback: Data lokal dari cache yang pernah diakses atau seedData jika offline
+    const cachedList = getCachedRecipes();
+    let localData = (cachedList && cachedList.length > 0)
+      ? cachedList.map(formatRecipeItem)
+      : seedRecipes.map(formatRecipeItem);
     if (cleanParams.category && cleanParams.category !== 'semua') {
       localData = localData.filter(r => r.category_id === cleanParams.category);
     }
@@ -221,7 +236,9 @@ export const recipeService = {
     try {
       const response = await api.get(`/recipes/${id}`);
       if (response && response.data) {
-        return response;
+        const item = formatRecipeItem(response.data);
+        saveOrUpdateCachedRecipe(item);
+        return { ...response, data: item };
       }
     } catch (apiErr) {}
 
@@ -246,20 +263,33 @@ export const recipeService = {
           .single();
 
         if (!error && data) {
+          const item = formatRecipeItem(data);
+          saveOrUpdateCachedRecipe(item);
           return {
             success: true,
-            data: formatRecipeItem(data)
+            data: item
           };
         }
       } catch (err) {}
     }
 
-    // 3. Fallback: Cari di seedData
-    const found = seedRecipes.find(r => r.id === id);
+    // 3. Fallback: Cari di cache offline lokal (data yang pernah dibuka sebelumnya)
+    const cachedItem = getCachedRecipeById(id);
+    if (cachedItem) {
+      return {
+        success: true,
+        data: formatRecipeItem(cachedItem),
+        isOffline: true
+      };
+    }
+
+    // 4. Fallback: Cari di seedData bawaan
+    const found = seedRecipes.find(r => r.id === id || r.slug === id);
     if (found) {
       return {
         success: true,
-        data: formatRecipeItem(found)
+        data: formatRecipeItem(found),
+        isOffline: true
       };
     }
 

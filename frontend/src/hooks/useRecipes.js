@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import recipeService from '../services/recipeService.js';
-import { getCachedRecipes, setCachedRecipes } from '../utils/storage.js';
+import { getCachedRecipes, saveOrUpdateCachedRecipes } from '../utils/storage.js';
 
 export const useRecipes = (filters = {}) => {
   const [recipes, setRecipes] = useState([]);
@@ -19,10 +19,10 @@ export const useRecipes = (filters = {}) => {
       const response = await recipeService.getRecipes(filters);
       if (response && response.success) {
         setRecipes(response.data || []);
-        setIsOfflineData(false);
-        // Cache recipes locally for offline viewing
-        if (!filters.search && !filters.category && !filters.maxBudget) {
-          setCachedRecipes(response.data || []);
+        setIsOfflineData(Boolean(response.isOffline));
+        // Simpan semua resep yang pernah diakses ke cache lokal agar bisa dibuka offline
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          saveOrUpdateCachedRecipes(response.data);
         }
       } else {
         throw new Error(response.message || 'Gagal memuat resep');
