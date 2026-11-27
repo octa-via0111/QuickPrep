@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { Disc3, RotateCw, ArrowRight, Utensils, Clock, CheckCircle } from 'lucide-react';
+import { Disc3, RotateCw, ArrowRight, Utensils, Clock, CheckCircle, Share2 } from 'lucide-react';
 import { formatRupiah, formatTime } from '../utils/formatter.js';
+import { shareRecipe } from '../utils/share.js';
 
 // Web Audio API tick generator
 const playWheelTick = () => {
@@ -287,19 +288,28 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <Link
               to={`/recipe/${winner.id}`}
               className="btn-primary"
-              style={{ flex: 1, padding: '10px 16px', fontSize: '14px', textDecoration: 'none' }}
+              style={{ flex: 1, padding: '10px 16px', fontSize: '14px', textDecoration: 'none', minWidth: '140px' }}
             >
               <span>Lihat Detail Resep</span>
               <ArrowRight size={16} />
             </Link>
             <button
+              onClick={() => shareRecipe(winner)}
+              className="btn-secondary"
+              style={{ padding: '10px 14px', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              title="Bagikan Menu Hasil Spin ke Teman"
+            >
+              <Share2 size={16} />
+              <span>Share Menu</span>
+            </button>
+            <button
               onClick={handleSpin}
               className="btn-secondary"
-              style={{ padding: '10px 16px', fontSize: '14px' }}
+              style={{ padding: '10px 14px', fontSize: '14px' }}
             >
               Spin Ulang
             </button>
