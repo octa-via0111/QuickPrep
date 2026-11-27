@@ -71,6 +71,18 @@ export const ExplorePage = () => {
 
   const { recipes, loading, error, refetch } = useRecipes(activeFilters);
 
+  // Lazy loading pagination: Muat resep secara bertahap (8 resep pertama)
+  const PAGE_SIZE = 8;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Reset pagination setiap kali filter berubah
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, category, maxBudget, tool, maxCookingTime, difficulty, sort]);
+
+  const displayedRecipes = recipes.slice(0, visibleCount);
+  const hasMore = visibleCount < recipes.length;
+
   const handleResetFilters = () => {
     setSearch('');
     setCategory('semua');
@@ -324,7 +336,15 @@ export const ExplorePage = () => {
       {/* Result Status Count */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-muted)' }}>
-          Menampilkan <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{recipes.length}</span> resep masakan
+          {hasMore ? (
+            <span>
+              Menampilkan <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{displayedRecipes.length}</span> dari {recipes.length} resep masakan
+            </span>
+          ) : (
+            <span>
+              Menampilkan <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{recipes.length}</span> resep masakan
+            </span>
+          )}
         </div>
       </div>
 
@@ -446,11 +466,44 @@ export const ExplorePage = () => {
           </button>
         </div>
       ) : (
-        <div className="grid-recipes">
-          {recipes.map(recipe => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
+        <>
+          <div className="grid-recipes">
+            {displayedRecipes.map(recipe => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </div>
+
+          {/* Tombol Lazy Load: Muat Lebih Banyak Resep */}
+          {hasMore && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '16px 0 24px'
+            }}>
+              <button
+                onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+                className="btn-primary"
+                style={{
+                  padding: '12px 28px',
+                  fontSize: '14px',
+                  borderRadius: '999px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <RotateCcw size={16} />
+                <span>Muat Lebih Banyak Resep ({recipes.length - displayedRecipes.length} lagi)</span>
+              </button>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Menampilkan {displayedRecipes.length} dari {recipes.length} resep
+              </span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

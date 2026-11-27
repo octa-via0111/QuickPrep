@@ -4,6 +4,7 @@ import { Clock, Heart, Users, ChefHat, Share2, Check } from 'lucide-react';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { shareRecipe } from '../utils/share.js';
+import LazyImage from './LazyImage.jsx';
 
 export const RecipeCard = ({ recipe }) => {
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -44,27 +45,32 @@ export const RecipeCard = ({ recipe }) => {
         position: 'relative',
         width: '100%',
         paddingTop: '62%', /* 16:10 Aspect Ratio */
-        backgroundColor: '#F0ECE4',
+        backgroundColor: 'var(--bg-secondary, #F0ECE4)',
         overflow: 'hidden'
       }}>
-        <img
+        <LazyImage
           src={formatImageUrl(recipe.image_url)}
           alt={recipe.name}
-          loading="lazy"
+          aspectRatio={null}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 0.4s ease'
+            height: '100%'
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-          onError={(e) => {
-            // Fallback food placeholder
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+          imgStyle={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
+          onMouseEnter={(e) => {
+            const img = e.currentTarget.querySelector('img');
+            if (img) img.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            const img = e.currentTarget.querySelector('img');
+            if (img) img.style.transform = 'scale(1)';
           }}
         />
 

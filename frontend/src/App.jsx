@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import BottomNav from './components/BottomNav.jsx';
@@ -6,19 +6,22 @@ import OfflineBanner from './components/OfflineBanner.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PWAInstallBanner from './components/PWAInstallBanner.jsx';
+import PageLoadingSkeleton from './components/PageLoadingSkeleton.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { trackNavigation } from './utils/navigation.js';
 
-import HomePage from './pages/HomePage.jsx';
-import ExplorePage from './pages/ExplorePage.jsx';
-import BudgetPage from './pages/BudgetPage.jsx';
-import SpinPage from './pages/SpinPage.jsx';
-import FavoritesPage from './pages/FavoritesPage.jsx';
-import RecipeDetailPage from './pages/RecipeDetailPage.jsx';
-import CookingModePage from './pages/CookingModePage.jsx';
-import ProfilePage from './pages/ProfilePage.jsx';
-import AdminPage from './pages/AdminPage.jsx';
+// Code Splitting & Route-Level Lazy Loading
+// Tiap halaman diunduh secara on-demand hanya saat dibuka pengguna
+const HomePage = lazy(() => import('./pages/HomePage.jsx'));
+const ExplorePage = lazy(() => import('./pages/ExplorePage.jsx'));
+const BudgetPage = lazy(() => import('./pages/BudgetPage.jsx'));
+const SpinPage = lazy(() => import('./pages/SpinPage.jsx'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage.jsx'));
+const RecipeDetailPage = lazy(() => import('./pages/RecipeDetailPage.jsx'));
+const CookingModePage = lazy(() => import('./pages/CookingModePage.jsx'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage.jsx'));
+const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 
 function App() {
   const location = useLocation();
@@ -41,23 +44,25 @@ function App() {
           {/* Top Sticky Navigation */}
           <Navbar />
 
-          {/* Main Content View */}
+          {/* Main Content View with Suspense Lazy Loading */}
           <main className="main-content">
             <ErrorBoundary>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/explore" element={<ExplorePage />} />
-                <Route path="/budget" element={<BudgetPage />} />
-                <Route path="/spin" element={<SpinPage />} />
-                <Route path="/favorites" element={<FavoritesPage />} />
-                <Route path="/recipe/:id" element={<RecipeDetailPage />} />
-                <Route path="/cook/:id" element={<CookingModePage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/about" element={<Navigate to="/profile" replace />} />
-                {/* Catch-all fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <Suspense fallback={<PageLoadingSkeleton />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/explore" element={<ExplorePage />} />
+                  <Route path="/budget" element={<BudgetPage />} />
+                  <Route path="/spin" element={<SpinPage />} />
+                  <Route path="/favorites" element={<FavoritesPage />} />
+                  <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+                  <Route path="/cook/:id" element={<CookingModePage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/about" element={<Navigate to="/profile" replace />} />
+                  {/* Catch-all fallback */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
             </ErrorBoundary>
           </main>
 

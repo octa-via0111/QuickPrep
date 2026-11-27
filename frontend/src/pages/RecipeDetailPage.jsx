@@ -29,6 +29,7 @@ import { useFavorites } from '../hooks/useFavorites.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { formatRupiah, formatTime, getDifficultyColor, formatImageUrl } from '../utils/formatter.js';
 import SubstitutionModal from '../components/SubstitutionModal.jsx';
+import LazyImage from '../components/LazyImage.jsx';
 import { goBackOneStep } from '../utils/navigation.js';
 import { shareRecipe } from '../utils/share.js';
 
@@ -282,13 +283,13 @@ export const RecipeDetailPage = () => {
           height: '320px',
           backgroundColor: '#F0ECE4'
         }}>
-          <img
+          <LazyImage
             src={formatImageUrl(recipe.image_url)}
             alt={recipe.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => {
-              e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
-            }}
+            aspectRatio={null}
+            style={{ width: '100%', height: '100%' }}
+            imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fallbackSrc="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
           />
           <div style={{
             position: 'absolute',
