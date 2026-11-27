@@ -2,10 +2,6 @@ import { Router } from 'express';
 
 const router = Router();
 
-// ==========================================
-// 1. ENDPOINT LOGIN TERSATU (UNIFIED LOGIN)
-// Otomatis mendeteksi Admin atau Pengguna
-// ==========================================
 router.post('/login', handleUnifiedLogin);
 router.post('/admin/login', handleUnifiedLogin);
 router.post('/user/login', handleUnifiedLogin);
@@ -59,8 +55,8 @@ function handleUnifiedLogin(req, res) {
 
     // 2. Jika bukan admin, proses sebagai Pengguna Biasa (User)
     const cleanEmail = identifier;
-    const cleanName = (name && name.trim()) 
-      ? name.trim() 
+    const cleanName = (name && name.trim())
+      ? name.trim()
       : (cleanEmail.includes('@') ? cleanEmail.split('@')[0] : cleanEmail);
     const userToken = `user_token_${Buffer.from(cleanEmail + ':' + Date.now()).toString('base64')}`;
 
@@ -114,7 +110,7 @@ router.post('/forgot-password', (req, res) => {
 // ==========================================
 router.get('/verify', (req, res) => {
   const authHeader = req.headers.authorization;
-  
+
   if (authHeader && authHeader.startsWith('Bearer quickprep_token_')) {
     return res.status(200).json({
       success: true,
