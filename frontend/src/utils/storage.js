@@ -2,6 +2,7 @@
 const FAVORITES_KEY = 'quickprep_favorites';
 const PROFILE_KEY = 'quickprep_profile';
 const HISTORY_KEY = 'quickprep_cooking_history';
+const SPIN_HISTORY_KEY = 'quickprep_spin_history';
 const CACHE_RECIPES_KEY = 'quickprep_cached_recipes';
 const CACHE_CATEGORIES_KEY = 'quickprep_cached_categories';
 const CACHE_TOOLS_KEY = 'quickprep_cached_tools';
@@ -101,6 +102,50 @@ export const addStoredHistory = (historyItem) => {
   } catch (e) {
     console.error('Error adding history', e);
     return getStoredHistory();
+  }
+};
+
+/**
+ * Spin History Operations (Riwayat Hasil Putar Roda Spin Menu)
+ */
+export const getStoredSpinHistory = () => {
+  try {
+    const raw = localStorage.getItem(SPIN_HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+export const addStoredSpinHistory = (recipe) => {
+  if (!recipe) return getStoredSpinHistory();
+  try {
+    const current = getStoredSpinHistory();
+    const newEntry = {
+      id: Date.now(),
+      recipe_id: recipe.id,
+      name: recipe.name,
+      image_url: recipe.image_url,
+      estimated_cost: recipe.estimated_cost,
+      cooking_time: recipe.cooking_time,
+      difficulty: recipe.difficulty,
+      spun_at: new Date().toISOString()
+    };
+    // Simpan maksimal 30 riwayat terakhir
+    const updated = [newEntry, ...current].slice(0, 30);
+    localStorage.setItem(SPIN_HISTORY_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.error('Error saving spin history', e);
+    return getStoredSpinHistory();
+  }
+};
+
+export const clearStoredSpinHistory = () => {
+  try {
+    localStorage.removeItem(SPIN_HISTORY_KEY);
+  } catch (e) {
+    console.error('Error clearing spin history', e);
   }
 };
 

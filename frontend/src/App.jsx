@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import BottomNav from './components/BottomNav.jsx';
@@ -7,6 +7,7 @@ import AuthModal from './components/AuthModal.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PWAInstallBanner from './components/PWAInstallBanner.jsx';
 import PageLoadingSkeleton from './components/PageLoadingSkeleton.jsx';
+import SplashScreen from './components/SplashScreen.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { trackNavigation } from './utils/navigation.js';
@@ -25,6 +26,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 
 function App() {
   const location = useLocation();
+  const [showSplash, setShowSplash] = useState(true);
 
   // Otomatis lacak riwayat halaman agar tombol kembali selalu tepat 1 langkah ke belakang
   useEffect(() => {
@@ -34,6 +36,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        {/* Splash Screen saat pertama kali membuka aplikasi */}
+        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+
         <div className="app-container">
           {/* Offline Status Warning Bar */}
           <OfflineBanner />

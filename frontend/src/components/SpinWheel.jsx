@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { Disc3, RotateCw, ArrowRight, Utensils, Clock, CheckCircle, Share2 } from 'lucide-react';
 import { formatRupiah, formatTime } from '../utils/formatter.js';
 import { shareRecipe } from '../utils/share.js';
+import { addStoredSpinHistory } from '../utils/storage.js';
 
 // Web Audio API tick generator
 const playWheelTick = () => {
@@ -161,6 +162,7 @@ export const SpinWheel = ({ recipes = [], onSelectRecipe }) => {
       setSpinning(false);
       const selected = candidateRecipes[randomIndex];
       setWinner(selected);
+      addStoredSpinHistory(selected);
       if (onSelectRecipe) onSelectRecipe(selected);
 
       // Trigger Confetti!
